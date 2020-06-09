@@ -1,0 +1,132 @@
+body {
+    background-color: #F0F0F0;
+}
+
+
+a {
+    font-family: verdana;
+}
+
+h2  {
+	font-family: Helvetica;
+
+
+}
+
+a:link {
+    text-decoration: none;
+	color: black;
+}
+
+a:active {
+    text-decoration: none;
+	color: black;
+}
+
+a:visited {
+    color: black;
+}
+
+.highlight {
+	background: #aca5bf;
+}
+
+.main_highlight {
+	background: #81C4B5;
+}
+
+.not_highlight {
+	background: white;
+}
+
+.conc_highlight {
+	background: #d9d9d9;
+}
+
+a[title="integral"] {
+	color: red;
+}
+
+
+
+a[title="non-integral"] {
+	color: blue;
+}
+
+a[title="hybrid"] {
+	color: green;
+}
+
+a[title="ref"] {
+	color: purple;
+}
+
+a[title="tagged"] {
+	color: #9f37ce;
+}
+
+div.top_bar {
+	background: #303030;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	height: 60px;
+	padding: 10px;
+	font-family: verdana;
+	color: white;
+
+}
+
+div.bottom_bar {
+	background: #303030;
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	right: 0px;
+	height: 35px;
+	overflow: auto;
+	padding: 10px;
+	font-family: verdana;
+	color: white;
+
+}
+
+div.text_window {
+	background-color: #FFFFFF;
+	position: absolute;
+	top: 85px;
+	left: 5px;
+	width: 700px;
+	bottom: 60px;
+	padding: 10px;
+	overflow: auto;
+	font-size: 20px;
+
+}
+
+div.info_box {
+	background-color: #F0F0F0;
+	position: absolute;
+	top: 85px;
+	left: 730px;
+	right: 5px;
+	bottom: 60px;
+	padding: 10px;
+	overflow: auto;
+	font-size: 20px;
+	font-family: verdana;
+	font-size: 16px;
+
+}
+
+.button {
+    background-color: #D3D3D3;
+    border: none;
+    color: white;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 12px;
+}

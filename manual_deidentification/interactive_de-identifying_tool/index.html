@@ -1,0 +1,203 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+  	<meta charset="utf-8">
+    <title>De-identification Tool</title>
+    <link href='https://fonts.googleapis.com/css?family=Space Mono' rel='stylesheet'>
+    <link href="style.css" rel="stylesheet">
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/4.2.6/d3.min.js"></script>
+		<script src="js/FileSaver.js"></script>
+		<script type="text/javascript">
+
+    var current_token = 0;
+		var total_token_count = 0;
+
+    function replaceToken(e) {
+      replacement = e.innerHTML;
+      var this_token = document.getElementById(current_token);
+      this_token.innerHTML = replacement;
+
+    }
+
+    function deleteToken(e) {
+      var this_token = document.getElementById(current_token);
+      this_token.innerHTML = "DELETED";
+
+    }
+
+    function revertToken() {
+      var this_token = document.getElementById(current_token);
+      replacement = this_token.getAttribute("original_token");
+      this_token.innerHTML = replacement;
+
+    }
+
+    function openToken(e) {
+      var previous_token = document.getElementById(current_token);
+      previous_token.className = 'not_highlight';
+
+      if (previous_token.getAttribute("proper_name") == "yes")  {
+        previous_token.className = 'conc_highlight';
+      }
+
+      if (previous_token.getAttribute("original_token") != previous_token.innerHTML
+           & current_token != 0) {
+        previous_token.className = 'highlight';
+      }
+
+      current_token = e.id;
+
+      token_info_div = document.getElementById("cit_info");
+      token_info_div.innerHTML = 'token #' + current_token;
+      token_info_div.innerHTML += ' out of ' + total_token_count + ' (';
+      token_info_div.innerHTML += ((current_token /total_token_count) * 100).toFixed(2) + '%)';
+
+      e.className = 'main_highlight';
+			token = e.innerHTML;
+
+
+
+      var this_text = '<h3>Change this token</h3>';
+      this_text += '<form>';
+      this_text += '<input type="text" name="token" value="' + token + '" readonly>';
+      this_text += '<h3>Replace with:</h3>';
+      this_text += '<a href="#" class="button" onclick="replaceToken(this);return false;">&lt;name&gt;</a> ';
+      this_text += '<a href="#" class="button" onclick="replaceToken(this);return false;">&lt;place&gt;</a> ';
+      this_text += '<a href="#" class="button" onclick="replaceToken(this);return false;">&lt;course&gt;</a> ';
+      this_text += '<a href="#" class="button" onclick="replaceToken(this);return false;">&lt;position&gt;</a> ';
+      this_text += '<h3>Delete Token:</h3>';
+      this_text += '<a href="#" class="button" onclick="deleteToken();return false;">Delete Token</a> ';
+      this_text += '<h3>Revert to Original:</h3>';
+      this_text += '<a href="#" class="button" onclick="revertToken();return false;">Revert to Original</a> ';
+      this_text += '</form>';
+      this_text += '<hr>'
+      this_text += "<b>Replacing names from texts:</b><br>Names of the students, instructor, or interviewees (for interview assignments) should be replaced with &lt;name&gt;.<br> <b>Removing identifying other identifying information from texts:</b><br>PLACE: In addition to names, we should look for places that might identify the student (not China, but a small city in a country not represented well in the corpus—all others besides China at this point should be considered as identifying information). These would probably come up in the literacy narrative, but could also be used to describe interviewees. <br>Give preference to the code &lt;name&gt;. If &lt;name&gt; does not seem appropriate, use &lt;place&gt; to replace the identifying information.<br>COURSE information: Professors (interviewees) might be identified through the course taught. Remove the course name and use the code &lt;course&gt;.<br>POSITION information: Professors (interviewees) may also be identified through a specific job title or position that they hold. Remove this information and use the code &lt;position&gt; in its place.<br><b>Removing tokens from texts:</b><br>Delete comments from instructors by using the 'delete token' button. When the file is downloaded, that token will not be copied over to the downloaded text file."
+
+
+      document.getElementById('info_box').innerHTML = this_text;
+
+    }
+
+
+
+		function readText(filePath) {
+				reader = new FileReader();
+				file_name = filePath.files[0].name;
+				var output = ""; //placeholder for text output
+				token_nbr = 0;
+        current_token = 0;
+    		total_token_count = 0;
+        var propername_pattern = /[A-Z][a-z]+/;
+				if(filePath.files && filePath.files[0]) {
+            		reader.onload = function (e) {
+                		output = e.target.result;
+                		var text = '';
+                    var start_text = false;
+                		var lines = output.split(/\r\n+/);
+                    for (i = 0; i < lines.length; i++) {
+                      var this_line1 = lines[i]
+                      var tokens = this_line1.split(' ')
+                      for (j = 0; j < tokens.length; j++) {
+                         var this_token = tokens[j];
+                         var this_token_clean = this_token.replace(/</g, "&lt;");
+                         this_token_clean = this_token_clean.replace(/>/g, "&gt;");
+                         this_token_clean = this_token_clean.replace(/"/g, "''");
+                         if (propername_pattern.test(this_token) & start_text) {
+                           text += '<a href="#" id="' + token_nbr + '" proper_name="yes" class="conc_highlight" original_token="' + this_token_clean + '" onclick="openToken(this);return false;">' + this_token_clean + '</a> ';
+                         } else {
+                             if (start_text) {
+                               text += '<a href="#" id="' + token_nbr + '" proper_name="no" class="not_highlight" original_token="' + this_token_clean + '" onclick="openToken(this);return false;">' + this_token_clean + '</a> ';
+                             } else {
+                               text += '<a href="#" id="' + token_nbr + '" proper_name="no" class="not_highlight" original_token="' + this_token_clean + '" onclick="return false;">' + this_token_clean + '</a> ';
+                             }
+                           }
+                         token_nbr += 1;
+                      }
+                      text += '<br>'
+                      text += '<a href="#" id="' + token_nbr + '" original_token="" onclick="return false;">\r\n</a> ';
+                      token_nbr += 1;
+                      if (this_line1.indexOf('<End Header>') != -1) {
+                        start_text = true;
+                      }
+
+                   }
+                		document.getElementById('text_window').innerHTML = text;
+                		total_token_count = token_nbr;
+                		document.getElementById('filename').value = file_name.replace(/\.txt|\.tec/g,'') + "_deidentified.txt";
+                		document.getElementById('info_box').innerHTML = "Click on a token/word on the text to start de-identification.";
+
+
+					};
+				reader.readAsText(filePath.files[0]);
+                };
+    }
+
+    function exportData() {
+		    var content = "";
+
+				for (var i = 0, length = total_token_count; i < length; i++) {
+
+					var token = document.getElementById(i);
+
+					if (token != null && token != 'DELETED') {
+						clean_token = token.innerHTML.replace(/&lt;/g,'<');
+						clean_token = clean_token.replace(/&gt;/g,'>');
+            clean_token = clean_token.replace(/''/g, '"');
+            clean_token = clean_token.replace(/&amp;/g,'&');
+            if (clean_token != 'DELETED') {
+              content +=  clean_token + " ";
+            }
+
+						}
+					}
+
+        var clean_content = content.replace(/\s+\n\s/g, '\n');
+
+				var blob = new Blob([clean_content], {type: "text/plain;charset=utf-8"});
+				var newfilename = document.getElementById('filename').value;
+				if (newfilename == '') {
+					newfilename = 'output.txt';
+				}
+				saveAs(blob, newfilename);
+
+		    }
+		</script>
+
+  </head>
+  <body>
+	<div id="top_bar" class="top_bar">
+		<table width="100%">
+			<tr>
+			<td><img src="images/crow_logo.png" width="50"></td>
+			<td>
+				<table>
+					<tr>
+						<td>Open File:</td>
+					</tr>
+					<tr>
+						<td>
+							<input type="file" onchange='readText(this)' />
+						</td>
+					</tr>
+				</table>
+			</td>
+
+			<td><h2>De-identification Tool </h2></td>
+			<td><div id="cit_info"></div></td>
+			<td><a href="#" class="button" onclick="location.reload();">Clear Tool</a></td>
+
+			</tr>
+		</table>
+
+	</div>
+
+	<div id="text_window" class="text_window"></div>
+	<div id="info_box" class="info_box">Load a text to de-identify</div>
+
+	<div id="bottom_bar" class="bottom_bar">
+
+		<form><a href="#" class="button" onclick="exportData();return false;">Download File</a> File name: <input type="text" id="filename" size="50"></form>
+
+	</div>
+  </body>
+</html>
