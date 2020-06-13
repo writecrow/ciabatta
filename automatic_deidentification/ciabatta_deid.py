@@ -10,6 +10,8 @@
 #   python deidentify.py --directory=../../../Fall\ 2018/files_with_headers/ --master_file=../../../Metadata/Fall\ 2018/Metadata_Fall_2018.csv
 #   python deidentify.py --directory=../../../Fall\ 2017/files_with_headers/Fall\ 2017/ --master_file=../../../Metadata/Fall\ 2017/Metadata_Fall_2017.xlsx
 
+
+#import packages
 import argparse
 import os
 import pandas
@@ -24,18 +26,26 @@ parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action="store", dest='dir', default='')
 args = parser.parse_args()
 
+
+#Creates a function to identify the files
 def deidentify_file(filename, overwrite=False):
     # only process text files
     found_text_files = False
     if '.txt' in filename:
         found_text_files = True
+        #Deletes slashes and periods (path) from file name
         cleaned_filename2 = re.sub(r'\.\.[\\\/]', r'', filename)
+        #creates output directory
         output_directory = 'deidentified'
+        #creates new files with the same name as original files in the output directory
         output_filename = os.path.join(output_directory, cleaned_filename2)
+        #creates directory inside output_directory with the same name as original directory
         directory = os.path.dirname(output_filename)
+        #if output directory does not exist already, creates one.
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+            
         textfile = open(filename, 'r')
         output_file = open(output_filename, "w")
         found_text_body=False
