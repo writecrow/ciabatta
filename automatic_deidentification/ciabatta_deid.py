@@ -10,6 +10,8 @@
 #   python deidentify.py --directory=../../../Fall\ 2018/files_with_headers/ --master_file=../../../Metadata/Fall\ 2018/Metadata_Fall_2018.csv
 #   python deidentify.py --directory=../../../Fall\ 2017/files_with_headers/Fall\ 2017/ --master_file=../../../Metadata/Fall\ 2017/Metadata_Fall_2017.xlsx
 
+
+#import packages
 import argparse
 import os
 import pandas
@@ -24,32 +26,43 @@ parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action="store", dest='dir', default='')
 args = parser.parse_args()
 
+
+#Creates a function to identify the files
 def deidentify_file(filename, overwrite=False):
     # only process text files
     found_text_files = False
     if '.txt' in filename:
         found_text_files = True
+        #Deletes slashes and periods (path) from file name
         cleaned_filename2 = re.sub(r'\.\.[\\\/]', r'', filename)
+        #creates output directory
         output_directory = 'deidentified'
+        #creates new files with the same name as original files in the output directory
         output_filename = os.path.join(output_directory, cleaned_filename2)
+        #creates directory inside output_directory with the same name as original directory
         directory = os.path.dirname(output_filename)
+        #if output directory does not exist already, creates one.
         if not os.path.exists(directory):
             os.makedirs(directory)
 
+        #for opening and reading in the file    
         textfile = open(filename, 'r')
+        #for opening the output file and writing in it
         output_file = open(output_filename, "w")
+        
         found_text_body=False
+        #loops through every line in the file
         for line in textfile:
-            # for every name in the list of names
+            # strips spaces at the end of the line
             line_nobreaks = line.strip()
             # if there's text in the line
             if line_nobreaks != '':
                 # if the last character in the line is a punctiation
                 if line_nobreaks[-1] in ['.', ';', '!', '?']:
-                    # print(line_nobreaks)
+                    #creates a found_text_body variable
                     found_text_body = True
 
-
+            #if the texts has not started
             if not found_text_body:
                 #cleans white space and line break in lines before text body
                 cleaned_line = re.sub(r'(\r+)?\n', r'', line)
@@ -57,6 +70,7 @@ def deidentify_file(filename, overwrite=False):
                 cleaned_line = re.sub(r'\s[A-Za-z]\.', r'', cleaned_line)
                 #I dont think we need this line because we dont have <name>
                 cleaned_line = re.sub(r'Name:|name:', r'', cleaned_line)
+                #removes name and last name
                 cleaned_line = re.sub(r'(([A-Z][a-z]+\s|-){1,3})?[A-Z][a-z]+', r'', cleaned_line)
                 # remove any extra spaces
                 cleaned_line = re.sub(r'\s', r'', cleaned_line)
