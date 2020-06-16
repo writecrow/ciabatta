@@ -45,21 +45,24 @@ def deidentify_file(filename, overwrite=False):
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-            
+        #for opening and reading in the file    
         textfile = open(filename, 'r')
+        #for opening the output file and writing in it
         output_file = open(output_filename, "w")
+        
         found_text_body=False
+        #loops through every line in the file
         for line in textfile:
-            # for every name in the list of names
+            # strips spaces at the end of the line
             line_nobreaks = line.strip()
             # if there's text in the line
             if line_nobreaks != '':
                 # if the last character in the line is a punctiation
                 if line_nobreaks[-1] in ['.', ';', '!', '?']:
-                    # print(line_nobreaks)
+                    #creates a found_text_body variable
                     found_text_body = True
 
-
+            #if the texts has not started
             if not found_text_body:
                 #cleans white space and line break in lines before text body
                 cleaned_line = re.sub(r'(\r+)?\n', r'', line)
@@ -67,6 +70,7 @@ def deidentify_file(filename, overwrite=False):
                 cleaned_line = re.sub(r'\s[A-Za-z]\.', r'', cleaned_line)
                 #I dont think we need this line because we dont have <name>
                 cleaned_line = re.sub(r'Name:|name:', r'', cleaned_line)
+                #removes name and last name
                 cleaned_line = re.sub(r'(([A-Z][a-z]+\s|-){1,3})?[A-Z][a-z]+', r'', cleaned_line)
                 # remove any extra spaces
                 cleaned_line = re.sub(r'\s', r'', cleaned_line)
