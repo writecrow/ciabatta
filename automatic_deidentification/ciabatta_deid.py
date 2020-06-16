@@ -1,57 +1,56 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-# DESCRIPTION: Given a metadata excel file with names to remove
-# and a directory with text files passed as arguments to the script,
-# names of students and instructors are replaced with <name>
-#
+
+# DESCRIPTION: 
+# Given a folder with .txt files (inlcuding subfolders),
+# the script removes lines before the body of the student texts that have names, initials, emails, etc. 
+# Disclaimer: this script deletes conseutive capitalized words and might delete assignment titles
+
+
 # Usage example:
-#   python deidentify.py --directory=../../../Spring\ 2018/files_with_headers/ --master_file=../../../Metadata/Spring\ 2018/Metadata_Spring_2018.csv
-#   python deidentify.py --directory=../../../Fall\ 2018/files_with_headers/ --master_file=../../../Metadata/Fall\ 2018/Metadata_Fall_2018.csv
-#   python deidentify.py --directory=../../../Fall\ 2017/files_with_headers/Fall\ 2017/ --master_file=../../../Metadata/Fall\ 2017/Metadata_Fall_2017.xlsx
+# Run this line below from the terminal on a Mac or command prompt on Windows
+# Mac example: python ciabatta_deid.py --directory=../../../spring_2018/files_with_headers/
+# PC example: python ciabatta_deid.py --directory=..\..\..\spring_2018\files_with_headers\
+# what follows --directory= is the folder with the files on your computer which you need to specify
 
 
 #import packages
 import argparse
 import os
-import pandas
 import re
-import sys
 
-from nltk.corpus import stopwords
-
-# Define the way we retrieve arguments sent to the script.
+# Lists the required arguments (e.g. --directory=) sent to the script 
 parser = argparse.ArgumentParser(description='De-identify Individual Textfile')
 parser.add_argument('--overwrite', action='store_true')
-parser.add_argument('--directory', action="store", dest='dir', default='')
+parser.add_argument('--directory', action='store', dest='dir', default='')
 args = parser.parse_args()
 
-
-#Creates a function to identify the files
+# creates a function that deidentifies each individual file
 def deidentify_file(filename, overwrite=False):
-    # only process text files
+    # only works with .txt files
     found_text_files = False
     if '.txt' in filename:
         found_text_files = True
-        #Deletes slashes and periods (path) from file name
+        # deletes slashes and periods from the filename path ../../../spring_2018/files_with_headers/
         cleaned_filename2 = re.sub(r'\.\.[\\\/]', r'', filename)
-        #creates output directory
+        # creates output directory
         output_directory = 'deidentified'
-        #creates new files with the same name as original files in the output directory
+        # creates new files with the same name as original files in the "deidentified" output directory 
         output_filename = os.path.join(output_directory, cleaned_filename2)
-        #creates directory inside output_directory with the same name as original directory
+        # creates directory inside the "deidentified" directory with the same name as original directory
         directory = os.path.dirname(output_filename)
-        #if output directory does not exist already, creates one.
+        # if output directory does not exist already, it creates one
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        #for opening and reading in the file    
+        # opens and reads in the file    
         textfile = open(filename, 'r')
-        #for opening the output file and writing in it
+        # opens the output file and writes in it
         output_file = open(output_filename, "w")
         
         found_text_body=False
-        #loops through every line in the file
+        # loops through every line in the file
         for line in textfile:
             # strips spaces at the end of the line
             line_nobreaks = line.strip()
@@ -59,18 +58,18 @@ def deidentify_file(filename, overwrite=False):
             if line_nobreaks != '':
                 # if the last character in the line is a punctiation
                 if line_nobreaks[-1] in ['.', ';', '!', '?']:
-                    #creates a found_text_body variable
+                    # creates a found_text_body variable
                     found_text_body = True
 
-            #if the texts has not started
+            # if the body of the texts has not started
             if not found_text_body:
-                #cleans white space and line break in lines before text body
+                # cleans white space and line break in lines before text body
                 cleaned_line = re.sub(r'(\r+)?\n', r'', line)
-                # remove any initials like H. and j.
+                # removes any initials like H. and j.
                 cleaned_line = re.sub(r'\s[A-Za-z]\.', r'', cleaned_line)
-                #I dont think we need this line because we dont have <name>
+                # I dont think we need this line because we dont have <name>
                 cleaned_line = re.sub(r'Name:|name:', r'', cleaned_line)
-                #removes name and last name
+                # removes name and last name
                 cleaned_line = re.sub(r'(([A-Z][a-z]+\s|-){1,3})?[A-Z][a-z]+', r'', cleaned_line)
                 # remove any extra spaces
                 cleaned_line = re.sub(r'\s', r'', cleaned_line)
