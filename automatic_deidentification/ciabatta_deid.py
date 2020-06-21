@@ -70,7 +70,7 @@ def deidentify_file(filename, overwrite=False):
                 # I dont think we need this line because we dont have <name>
                 cleaned_line = re.sub(r'Name:|name:', r'', cleaned_line)
                 # removes name and last name
-                cleaned_line = re.sub(r'(([A-Z][a-z]+\s|-){1,3})?[A-Z][a-z]+', r'', cleaned_line)
+                cleaned_line = re.sub(r'(([A-Z][a-z]+\s+){1,3})?[A-Za-z]+', r'', cleaned_line)
                 # remove any extra spaces
                 cleaned_line = re.sub(r'\s', r'', cleaned_line)
                 cleaned_line = cleaned_line.strip()
