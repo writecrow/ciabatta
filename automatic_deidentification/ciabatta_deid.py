@@ -119,15 +119,22 @@ def deidentify_file(filename, overwrite=False):
                 # check if line starts with identifying words
                 matches = re.findall(
                     r'^(professor|prof\.|teacher|instructor|m\.|mrs?\.|ms\.|dr\.|student|net\s?id|id)', line, flags=re.IGNORECASE)
+                #if there are matches for identifying words (i.e. prof, teacher)
                 if len(matches) != 0:
                     # remove from line patterns for proper names
+                    # remove line breaks and spaces
                     cleaned_line1 = re.sub(r'(\r+)?\n', r'', line)
+                    #remove titles followed by names
                     cleaned_line1 = re.sub(r'Mr\.|Dr\.|Mr?s\.|[A-Z]\.|\s[A-Za-z]\s', r'', cleaned_line1)
+                    # remove punctuation (i.e. Prof. Novikov)
                     cleaned_line1 = re.sub(r'(,|\.|\:)', r'', cleaned_line1)
+                    # remove identifying name patterns
                     cleaned_line1 = re.sub(r'Name:|name:', r'', cleaned_line1)
+                    #remove two name, or names and last names, or names and numbers
                     cleaned_line1 = re.sub(r'(([A-Z][a-z]+\s){1,3})?[A-Z][a-z]+', r'', cleaned_line1)
                     # remove any extra spaces
                     cleaned_line1 = re.sub(r'\s', r'', cleaned_line1)
+                    #remove any extra space
                     cleaned_line1 = cleaned_line1.strip()
                 if (cleaned_line != '' and cleaned_line1 != ''):
                     if not ('.' not in line and '<name>' in line):
