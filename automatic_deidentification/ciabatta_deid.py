@@ -26,6 +26,31 @@ parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action='store', dest='dir', default='')
 args = parser.parse_args()
 
+# function to remove any name patterns from a line of text
+def clean_names_from_line(original_line):
+    # cleans white space and line break in lines before text body
+    cleaned_line = re.sub(r'(\r+)?\n', r'', original_line)
+    
+    # removes any initials like H. and j.
+    cleaned_line = re.sub(r'\s[A-Za-z]\.', r'', cleaned_line)
+    
+    # removes titles and other identifiers
+    cleaned_line = re.sub(r'name|net\s?id|id|student|professor|prof\.|teacher|instructor|Mr\.|Dr\.|Mr?s\.|[A-Z]\.|\s[A-Za-z]\s', r'', cleaned_line, flags=re.IGNORECASE)
+    
+    # removes any remaining punctuation
+    cleaned_line = re.sub(r'(,|\.|\:)', r'', cleaned_line)
+    
+    # removes name and last name
+    cleaned_line = re.sub(r'(([A-Z][a-z]+\s+){1,3})?[A-Za-z]+', r'', cleaned_line)
+    
+    # remove any extra spaces
+    cleaned_line = re.sub(r'\s', r'', cleaned_line)
+    cleaned_line = cleaned_line.strip()
+    
+    # return the line with name patterns removed
+    return(cleaned_line)
+
+
 # creates a function that deidentifies each individual file
 def deidentify_file(filename, overwrite=False):
     # only works with .txt files
