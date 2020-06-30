@@ -34,12 +34,16 @@ def deidentify_file(filename, overwrite=False):
         found_text_files = True
         # deletes slashes and periods from the filename path ../../../spring_2018/files_with_headers/
         cleaned_filename2 = re.sub(r'\.\.[\\\/]', r'', filename)
+        
         # creates output directory
         output_directory = 'deidentified'
+        
         # creates new files with the same name as original files in the "deidentified" output directory 
         output_filename = os.path.join(output_directory, cleaned_filename2)
+        
         # creates directory inside the "deidentified" directory with the same name as original directory
         directory = os.path.dirname(output_filename)
+        
         # if output directory does not exist already, it creates one
         if not os.path.exists(directory):
             os.makedirs(directory)
@@ -67,7 +71,7 @@ def deidentify_file(filename, overwrite=False):
                 cleaned_line = re.sub(r'(\r+)?\n', r'', line)
                 # removes any initials like H. and j.
                 cleaned_line = re.sub(r'\s[A-Za-z]\.', r'', cleaned_line)
-                # I dont think we need this line because we dont have <name>
+                # deletes name: and Name: if the students used that in front of their names
                 cleaned_line = re.sub(r'Name:|name:', r'', cleaned_line)
                 # removes name and last name
                 cleaned_line = re.sub(r'(([A-Z][a-z]+\s+){1,3})?[A-Za-z]+', r'', cleaned_line)
@@ -131,7 +135,7 @@ def deidentify_file(filename, overwrite=False):
                     cleaned_line1 = cleaned_line1.strip()
                 if (cleaned_line != '' and cleaned_line1 != ''):
                     if not ('.' not in line and '<name>' in line):
-                        # check if like is a Word comment
+                        # check if line is a Word comment
                         if line[0] != '[':
                             new_line2 = re.sub(r'\s+', r' ', line)
                             # remove other Word comments, e.g., [AP 1]
