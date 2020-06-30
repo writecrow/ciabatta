@@ -2,9 +2,9 @@
 # -*- coding: utf-8 -*-
 
 
-# DESCRIPTION: 
+# DESCRIPTION:
 # Given a folder with .txt files (inlcuding subfolders),
-# the script removes lines before the body of the student texts that have names, initials, emails, etc. 
+# the script removes lines before the body of the student texts that have names, initials, emails, etc.
 # Disclaimer: this script deletes conseutive capitalized words and might delete assignment titles
 
 
@@ -20,7 +20,7 @@ import argparse
 import os
 import re
 
-# Lists the required arguments (e.g. --directory=) sent to the script 
+# Lists the required arguments (e.g. --directory=) sent to the script
 parser = argparse.ArgumentParser(description='De-identify Individual Textfile')
 parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action='store', dest='dir', default='')
@@ -30,23 +30,36 @@ args = parser.parse_args()
 def clean_names_from_line(original_line):
     # cleans white space and line break in lines before text body
     cleaned_line = re.sub(r'(\r+)?\n', r'', original_line)
-    
+
     # removes any initials like H. and j.
     cleaned_line = re.sub(r'\s[A-Za-z]\.', r'', cleaned_line)
-    
+
     # removes titles and other identifiers
     cleaned_line = re.sub(r'name|net\s?id|id|student|professor|prof\.|teacher|instructor|Mr\.|Dr\.|Mr?s\.|[A-Z]\.|\s[A-Za-z]\s', r'', cleaned_line, flags=re.IGNORECASE)
-    
+
     # removes any remaining punctuation
     cleaned_line = re.sub(r'(,|\.|\:)', r'', cleaned_line)
-    
+
     # removes name and last name
     cleaned_line = re.sub(r'(([A-Z][a-z]+\s+){1,3})?[A-Za-z]+', r'', cleaned_line)
-    
+
+    # remove numbers
+    cleaned_line = re.sub(r'[0-9]+', r'', cleaned_line)
+
     # remove any extra spaces
     cleaned_line = re.sub(r'\s', r'', cleaned_line)
     cleaned_line = cleaned_line.strip()
-    
+
+    # return the line with name patterns removed
+    return(cleaned_line)
+
+# function to remove any email address patterns from a line of text
+def clean_email_from_line(original_line):
+    cleaned_line = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'', original_line)
+    # remove any extra spaces
+    cleaned_line = re.sub(r'\s', r'', cleaned_line)
+    cleaned_line = cleaned_line.strip()
+
     # return the line with name patterns removed
     return(cleaned_line)
 
@@ -59,25 +72,25 @@ def deidentify_file(filename, overwrite=False):
         found_text_files = True
         # deletes slashes and periods from the filename path ../../../spring_2018/files_with_headers/
         cleaned_filename2 = re.sub(r'\.\.[\\\/]', r'', filename)
-        
+
         # creates output directory
         output_directory = 'deidentified'
-        
-        # creates new files with the same name as original files in the "deidentified" output directory 
+
+        # creates new files with the same name as original files in the "deidentified" output directory
         output_filename = os.path.join(output_directory, cleaned_filename2)
-        
+
         # creates directory inside the "deidentified" directory with the same name as original directory
         directory = os.path.dirname(output_filename)
-        
+
         # if output directory does not exist already, it creates one
         if not os.path.exists(directory):
             os.makedirs(directory)
 
-        # opens and reads in the file    
+        # opens and reads in the file
         textfile = open(filename, 'r')
         # opens the output file and writes in it
         output_file = open(output_filename, "w")
-        
+
         found_text_body=False
         # loops through every line in the file
         for line in textfile:
@@ -92,35 +105,17 @@ def deidentify_file(filename, overwrite=False):
 
             # if the body of the texts has not started
             if not found_text_body:
-                # cleans white space and line break in lines before text body
-                cleaned_line = re.sub(r'(\r+)?\n', r'', line)
-                # removes any initials like H. and j.
-                cleaned_line = re.sub(r'\s[A-Za-z]\.', r'', cleaned_line)
-                # deletes name: and Name: if the students used that in front of their names
-                cleaned_line = re.sub(r'Name:|name:', r'', cleaned_line)
-                # removes name and last name
-                cleaned_line = re.sub(r'(([A-Z][a-z]+\s+){1,3})?[A-Za-z]+', r'', cleaned_line)
-                # remove any extra spaces
-                cleaned_line = re.sub(r'\s', r'', cleaned_line)
-                cleaned_line = cleaned_line.strip()
-
-                # if removing numbers makes line empty, the line
-                # had only numbers and nothing else
-                cleaned_line2 = re.sub(r'(\r+)?\n', r'', line)
-                cleaned_line2 = re.sub(r'[0-9]+', r'', cleaned_line2)
-                # remove any extra spaces
-                cleaned_line2 = re.sub(r'\s', r'', cleaned_line2)
-                cleaned_line2 = cleaned_line2.strip()
+                # call function to clean names from line
+                # if removing names makes line empty, the line
+                # had only names and nothing else
+                line_no_names = clean_names_from_line(line)
 
                 # if removing email addresses makes line empty, the line
                 # had only email addresses and nothing else
-                cleaned_line3 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'', line)
-                # remove any extra spaces
-                cleaned_line3 = re.sub(r'\s', r'', cleaned_line3)
-                cleaned_line3 = cleaned_line3.strip()
-                if (cleaned_line != '' and
-                        cleaned_line2 != '' and
-                        cleaned_line3 != ''):
+                line_no_emails = clean_email_from_line(line)
+
+                if (line_no_names != '' and
+                        line_no_emails != ''):
                     if not ('.' not in line and '<name>' in line):
                         # check if line is a Word comment
                         if not line[0] == '[':
@@ -140,25 +135,12 @@ def deidentify_file(filename, overwrite=False):
             else:
                 # if removing email addresses makes line empty, the line
                 # had only email addresses and nothing else
-                cleaned_line = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@([A-Z]|[a-z]|[0-9]|\.)+', r'', line)
-                # remove any extra spaces
-                cleaned_line = re.sub(r'\s', r'', cleaned_line)
-                cleaned_line = cleaned_line.strip()
-                cleaned_line1 = 'not empty'
-                # check if line starts with identifying words
-                matches = re.findall(
-                    r'^(professor|prof\.|teacher|instructor|m\.|mrs?\.|ms\.|dr\.|student|net\s?id|id)', line, flags=re.IGNORECASE)
-                if len(matches) != 0:
-                    # remove from line patterns for proper names
-                    cleaned_line1 = re.sub(r'(\r+)?\n', r'', line)
-                    cleaned_line1 = re.sub(r'Mr\.|Dr\.|Mr?s\.|[A-Z]\.|\s[A-Za-z]\s', r'', cleaned_line1)
-                    cleaned_line1 = re.sub(r'(,|\.|\:)', r'', cleaned_line1)
-                    cleaned_line1 = re.sub(r'Name:|name:', r'', cleaned_line1)
-                    cleaned_line1 = re.sub(r'(([A-Z][a-z]+\s){1,3})?[A-Z][a-z]+', r'', cleaned_line1)
-                    # remove any extra spaces
-                    cleaned_line1 = re.sub(r'\s', r'', cleaned_line1)
-                    cleaned_line1 = cleaned_line1.strip()
-                if (cleaned_line != '' and cleaned_line1 != ''):
+                cleaned_line1 = clean_email_from_line(line)
+
+                # call function to clean names from line
+                cleaned_line2 = clean_names_from_line(line)
+
+                if (cleaned_line1 != '' and cleaned_line2 != ''):
                     if not ('.' not in line and '<name>' in line):
                         # check if line is a Word comment
                         if line[0] != '[':
