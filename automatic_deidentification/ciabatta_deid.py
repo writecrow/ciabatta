@@ -97,7 +97,7 @@ def deidentify_file(filename, overwrite=False):
                         cleaned_line2 != '' and
                         cleaned_line3 != ''):
                     if not ('.' not in line and '<name>' in line):
-                        # check if like is a Word comment
+                        # check if line is a Word comment
                         if not line[0] == '[':
                             # remove other Word comments, e.g., [AP 1]
                             new_line2 = re.sub(r'\[([A-Z][A-Z]\s?[0-9]{1,2})\]', r'', line)
