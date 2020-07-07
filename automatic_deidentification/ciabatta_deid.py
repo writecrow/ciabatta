@@ -5,7 +5,7 @@
 # DESCRIPTION:
 # Given a folder with .txt files (inlcuding subfolders),
 # the script removes lines before the body of the student texts that have names, initials, emails, etc.
-# Disclaimer: this script deletes conseutive capitalized words and might delete assignment titles
+# Disclaimer: this script deletes consecutive capitalized words and might delete assignment titles
 
 
 # Usage example:
@@ -15,7 +15,7 @@
 # what follows --directory= is the folder with the files on your computer which you need to specify
 
 
-#import packages
+# imports packages
 import argparse
 import os
 import re
@@ -26,7 +26,7 @@ parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action='store', dest='dir', default='')
 args = parser.parse_args()
 
-# function to remove any name patterns from a line of text
+# creates a function to remove any name patterns from lines before the main body of the text
 def clean_names_from_line(original_line):
     # cleans white space and line break in lines before text body
     cleaned_line = re.sub(r'(\r+)?\n', r'', original_line)
@@ -37,30 +37,30 @@ def clean_names_from_line(original_line):
     # removes titles and other identifiers
     cleaned_line = re.sub(r'name|net\s?id|id|student|professor|prof\.|teacher|instructor|Mr\.|Dr\.|Mr?s\.|[A-Z]\.|\s[A-Za-z]\s', r'', cleaned_line, flags=re.IGNORECASE)
 
-    # removes any remaining punctuation
+    # removes any punctuation remained after removing titles and other identifiers
     cleaned_line = re.sub(r'(,|\.|\:)', r'', cleaned_line)
 
-    # removes name and last name
+    # removes up to three names (first, middle, last)
     cleaned_line = re.sub(r'(([A-Z][a-z]+\s+){1,3})?[A-Za-z]+', r'', cleaned_line)
 
-    # remove numbers
+    # removes numerals 
     cleaned_line = re.sub(r'[0-9]+', r'', cleaned_line)
 
-    # remove any extra spaces
+    # removes any extra spaces
     cleaned_line = re.sub(r'\s', r'', cleaned_line)
     cleaned_line = cleaned_line.strip()
 
-    # return the line with name patterns removed
+    # returns the line with the above patterns removed
     return(cleaned_line)
 
-# function to remove any email address patterns from a line of text
+# creates a function to remove any email address patterns from anywhere in the text?
 def clean_email_from_line(original_line):
     cleaned_line = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'', original_line)
-    # remove any extra spaces
+    # removes any extra spaces
     cleaned_line = re.sub(r'\s', r'', cleaned_line)
     cleaned_line = cleaned_line.strip()
 
-    # return the line with name patterns removed
+    # returns the line with email address patterns removed
     return(cleaned_line)
 
 
