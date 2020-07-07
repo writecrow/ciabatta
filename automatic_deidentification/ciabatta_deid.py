@@ -26,7 +26,7 @@ parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action='store', dest='dir', default='')
 args = parser.parse_args()
 
-# creates a function to remove any name patterns from lines before the main body of the text
+# creates a function to remove any name patterns from lines
 def clean_names_from_line(original_line):
     # cleans white space and line break in lines before text body
     cleaned_line = re.sub(r'(\r+)?\n', r'', original_line)
@@ -53,18 +53,18 @@ def clean_names_from_line(original_line):
     # returns the line with the above patterns removed
     return(cleaned_line)
 
-# creates a function to remove any email address patterns from anywhere in the text?
+# creates a function to remove any email addresses
 def clean_email_from_line(original_line):
     cleaned_line = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'', original_line)
     # removes any extra spaces
     cleaned_line = re.sub(r'\s', r'', cleaned_line)
     cleaned_line = cleaned_line.strip()
 
-    # returns the line with email address patterns removed
+    # returns the line with email addresses removed
     return(cleaned_line)
 
 
-# creates a function that deidentifies each individual file
+# creates a function that deidentifies an individual file
 def deidentify_file(filename, overwrite=False):
     # only works with .txt files
     found_text_files = False
@@ -73,13 +73,13 @@ def deidentify_file(filename, overwrite=False):
         # deletes slashes and periods from the filename path ../../../spring_2018/files_with_headers/
         cleaned_filename2 = re.sub(r'\.\.[\\\/]', r'', filename)
 
-        # creates output directory
+        # creates an output directory called "deidentified"
         output_directory = 'deidentified'
 
         # creates new files with the same name as original files in the "deidentified" output directory
         output_filename = os.path.join(output_directory, cleaned_filename2)
 
-        # creates directory inside the "deidentified" directory with the same name as original directory
+        # creates a directory with subdirectories inside the "deidentified" directory with the same names as the original directory and subdirectories
         directory = os.path.dirname(output_filename)
 
         # if output directory does not exist already, it creates one
@@ -96,22 +96,23 @@ def deidentify_file(filename, overwrite=False):
         for line in textfile:
             # strips spaces at the end of the line
             line_nobreaks = line.strip()
-            # if there's text in the line
+            # if there's text in the line (if the line is not empty)
             if line_nobreaks != '':
-                # if the last character in the line is a punctiation
+                # if the last character in the line is a period, semicolon, exclamation or question mark
                 if line_nobreaks[-1] in ['.', ';', '!', '?']:
-                    # creates a found_text_body variable
+                    # creates a found_text_body variable to identify the body of the text
                     found_text_body = True
 
-            # if the body of the texts has not started
+            # if the body of the texts has not started yet
             if not found_text_body:
-                # call function to clean names from line
-                # if removing names makes line empty, the line
-                # had only names and nothing else
+                # calls function to clean names from the lines before the body of the text
+                # (if removing names makes line empty, the line
+                # had only names and nothing else)
                 line_no_names = clean_names_from_line(line)
-
-                # if removing email addresses makes line empty, the line
-                # had only email addresses and nothing else
+                
+                # calls function to clean email addresses from the lines before the body of the text
+                # (if removing email addresses makes line empty, the line
+                # had only email addresses and nothing else)
                 line_no_emails = clean_email_from_line(line)
 
                 if (line_no_names != '' and
@@ -119,11 +120,11 @@ def deidentify_file(filename, overwrite=False):
                     if not ('.' not in line and '<name>' in line):
                         # check if line is a Word comment
                         if not line[0] == '[':
-                            # remove other Word comments, e.g., [AP 1]
+                            # removes other Word comments, e.g., [AP 1]
                             new_line2 = re.sub(r'\[([A-Z][A-Z]\s?[0-9]{1,2})\]', r'', line)
-                            # replace emails with <email>
+                            # replaces emails with <email>
                             new_line2 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'<email>', new_line2)
-                            # check if line starts with identifying words
+                            # checks if line starts with identifying words
                             matches = re.findall(
                                 r'^(professor|prof\.|teacher|instructor|m\.|mrs?\.|ms\.|dr\.|student|net\s?id|id)', new_line2, flags=re.IGNORECASE)
                             # if the line does not start with any of the above
@@ -145,7 +146,7 @@ def deidentify_file(filename, overwrite=False):
                         # check if line is a Word comment
                         if line[0] != '[':
                             new_line2 = re.sub(r'\s+', r' ', line)
-                            # remove other Word comments, e.g., [AP 1]
+                            # removes other Word comments, e.g., [AP 1]
                             new_line2 = re.sub(r'\[([A-Z][A-Z]\s?[0-9]{1,2})\]', r'', new_line2)
                             # replace emails with <email>
                             new_line2 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'<email>', new_line2)
@@ -154,7 +155,7 @@ def deidentify_file(filename, overwrite=False):
         output_file.close()
         textfile.close()
     return(found_text_files)
-
+# creates a function that deidentifies each file in a folder and all subfolders recursively
 def deidentify_recursive(directory, overwrite=False):
     found_text_files = False
     for dirpath, dirnames, files in os.walk(directory):
@@ -162,6 +163,7 @@ def deidentify_recursive(directory, overwrite=False):
             is_this_a_text_file = deidentify_file(os.path.join(dirpath, name), overwrite)
             if is_this_a_text_file:
                 found_text_files = True
+    #If no .txt texts were found in the directory, it prints "No text files found in the directory"
     if not found_text_files:
         print('No text files found in the directory.')
 
