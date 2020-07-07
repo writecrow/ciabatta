@@ -43,7 +43,7 @@ def clean_names_from_line(original_line):
     # removes up to three names (first, middle, last)
     cleaned_line = re.sub(r'(([A-Z][a-z]+\s+){1,3})?[A-Za-z]+', r'', cleaned_line)
 
-    # removes numerals 
+    # removes numerals
     cleaned_line = re.sub(r'[0-9]+', r'', cleaned_line)
 
     # removes any extra spaces
@@ -57,7 +57,7 @@ def clean_names_from_line(original_line):
 def clean_email_from_line(original_line):
     # removes email patterns from line
     cleaned_line = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'', original_line)
-    
+
     # removes any extra spaces
     cleaned_line = re.sub(r'\s', r'', cleaned_line)
     cleaned_line = cleaned_line.strip()
@@ -71,9 +71,12 @@ def deidentify_file(filename, overwrite=False):
     # only works with .txt files
     found_text_files = False
     if '.txt' in filename:
+        # tells the user file is being processed
+        print("Processing file " + filename)
+
         # switches flag to true
         found_text_files = True
-        
+
         # deletes slashes and periods from the filename path ../../../spring_2018/files_with_headers/
         cleaned_filename2 = re.sub(r'\.\.[\\\/]', r'', filename)
 
@@ -92,17 +95,17 @@ def deidentify_file(filename, overwrite=False):
 
         # opens and reads in the file
         textfile = open(filename, 'r')
-        
+
         # opens the output file and writes in it
         output_file = open(output_filename, "w")
 
         found_text_body=False
         # loops through every line in the file
-        
+
         for line in textfile:
             # strips spaces at the end of the line
             line_nobreaks = line.strip()
-            
+
             # if there's text in the line (if the line is not empty)
             if line_nobreaks != '':
                 # if the last character in the line is a period, semicolon, exclamation or question mark
@@ -110,63 +113,44 @@ def deidentify_file(filename, overwrite=False):
                     # creates a found_text_body variable to identify the body of the text
                     found_text_body = True
 
-            # if the body of the texts has not started yet
-            if not found_text_body:
-                # calls function to clean names from the lines before the body of the text
-                # (if removing names makes line empty, the line
-                # had only names and nothing else)
-                line_no_names = clean_names_from_line(line)
-                
-                # calls function to clean email addresses from the lines before the body of the text
-                # (if removing email addresses makes line empty, the line
-                # had only email addresses and nothing else)
-                line_no_emails = clean_email_from_line(line)
 
-                if (line_no_names != '' and
-                        line_no_emails != ''):
-           
-                    # check if line is a Word comment
-                    if not line[0] == '[':
-                        # removes other Word comments, e.g., [AP 1]
-                        new_line2 = re.sub(r'\[([A-Z][A-Z]\s?[0-9]{1,2})\]', r'', line)
-                        
-                        # removes any remaining emails 
+            # calls function to clean names from the lines before the body of the text
+            # (if removing names makes line empty, the line
+            # had only names and nothing else)
+            line_no_names = clean_names_from_line(line)
+
+            # calls function to clean email addresses from the lines before the body of the text
+            # (if removing email addresses makes line empty, the line
+            # had only email addresses and nothing else)
+            line_no_emails = clean_email_from_line(line)
+
+            if (line_no_names != '' and
+                    line_no_emails != ''):
+
+                # check if line is a Word comment
+                if not line[0] == '[':
+                    # removes other Word comments, e.g., [AP 1]
+                    new_line2 = re.sub(r'\[([A-Z][A-Z]\s?[0-9]{1,2})\]', r'', line)
+
+                    # if the body of the texts has not started yet
+                    if not found_text_body:
+                        # removes any remaining emails
                         new_line2 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'', new_line2)
-                        
-                        # removes any exra spaces
-                        new_line2 = re.sub(r'\s+', r' ', new_line2)
-                        
-                        # writes out line and linebreak for cross-platform use 
-                        output_file.write(new_line2.strip() + '\r\n')
-
-            # deidentifies the main body of the text
-            else:
-                # if removing email addresses makes line empty, the line
-                # had only email addresses and nothing else
-                cleaned_line1 = clean_email_from_line(line)
-
-                # calls function to clean names from line
-                cleaned_line2 = clean_names_from_line(line)
-
-                if (cleaned_line1 != '' and cleaned_line2 != ''):
-                    # checks if line is a Word comment
-                    if line[0] != '[':
-                        # removes extra spaces
-                        new_line2 = re.sub(r'\s+', r' ', line)
-                        
-                        # removes other Word comments, e.g., [AP 1]
-                        new_line2 = re.sub(r'\[([A-Z][A-Z]\s?[0-9]{1,2})\]', r'', new_line2)
-                        
+                    # if we are in the body of the text already
+                    else:
                         # replaces emails with <email>
                         new_line2 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'<email>', new_line2)
-                        
-                        # writes out line with linebreak for cross-platform use
-                        output_file.write(new_line2.strip() + '\r\n')
-        
+
+                    # removes any exra spaces
+                    new_line2 = re.sub(r'\s+', r' ', new_line2)
+
+                    # writes out line and linebreak for cross-platform use
+                    output_file.write(new_line2.strip() + '\r\n')
+
         # closes the file after writing
         output_file.close()
         textfile.close()
-    
+
     # returns whether text file was found
     return(found_text_files)
 
@@ -174,18 +158,18 @@ def deidentify_file(filename, overwrite=False):
 def deidentify_recursive(directory, overwrite=False):
     # creates control variable to check if there were any text files in the provided folder
     found_text_files = False
-    
+
     # walks folder structure to get all files in all folders
     for dirpath, dirnames, files in os.walk(directory):
         # for every file found in a folder
         for name in files:
             # calls function that deidentifies an individual file
             is_this_a_text_file = deidentify_file(os.path.join(dirpath, name), overwrite)
-            
+
             # changes the variable if a text file was processed
             if is_this_a_text_file:
                 found_text_files = True
-                
+
     # if no .txt texts were found in the directory, it prints "No text files found in the directory"
     if not found_text_files:
         print('No text files found in the directory.')
@@ -196,4 +180,3 @@ if args.dir:
     deidentify_recursive(args.dir)
 else:
     print('You need to supply a directory with textfiles')
-
