@@ -55,7 +55,9 @@ def clean_names_from_line(original_line):
 
 # creates a function to remove any email addresses
 def clean_email_from_line(original_line):
+    # removes email patterns from line
     cleaned_line = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'', original_line)
+    
     # removes any extra spaces
     cleaned_line = re.sub(r'\s', r'', cleaned_line)
     cleaned_line = cleaned_line.strip()
@@ -69,7 +71,9 @@ def deidentify_file(filename, overwrite=False):
     # only works with .txt files
     found_text_files = False
     if '.txt' in filename:
+        # switches flag to true
         found_text_files = True
+        
         # deletes slashes and periods from the filename path ../../../spring_2018/files_with_headers/
         cleaned_filename2 = re.sub(r'\.\.[\\\/]', r'', filename)
 
@@ -88,14 +92,17 @@ def deidentify_file(filename, overwrite=False):
 
         # opens and reads in the file
         textfile = open(filename, 'r')
+        
         # opens the output file and writes in it
         output_file = open(output_filename, "w")
 
         found_text_body=False
         # loops through every line in the file
+        
         for line in textfile:
             # strips spaces at the end of the line
             line_nobreaks = line.strip()
+            
             # if there's text in the line (if the line is not empty)
             if line_nobreaks != '':
                 # if the last character in the line is a period, semicolon, exclamation or question mark
@@ -122,10 +129,13 @@ def deidentify_file(filename, overwrite=False):
                     if not line[0] == '[':
                         # removes other Word comments, e.g., [AP 1]
                         new_line2 = re.sub(r'\[([A-Z][A-Z]\s?[0-9]{1,2})\]', r'', line)
+                        
                         # removes any remaining emails 
                         new_line2 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'', new_line2)
+                        
                         # removes any exra spaces
                         new_line2 = re.sub(r'\s+', r' ', new_line2)
+                        
                         # writes out line and linebreak for cross-platform use 
                         output_file.write(new_line2.strip() + '\r\n')
 
@@ -141,31 +151,46 @@ def deidentify_file(filename, overwrite=False):
                 if (cleaned_line1 != '' and cleaned_line2 != ''):
                     # checks if line is a Word comment
                     if line[0] != '[':
+                        # removes extra spaces
                         new_line2 = re.sub(r'\s+', r' ', line)
+                        
                         # removes other Word comments, e.g., [AP 1]
                         new_line2 = re.sub(r'\[([A-Z][A-Z]\s?[0-9]{1,2})\]', r'', new_line2)
+                        
                         # replaces emails with <email>
                         new_line2 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'<email>', new_line2)
+                        
                         # writes out line with linebreak for cross-platform use
                         output_file.write(new_line2.strip() + '\r\n')
+        
         # closes the file after writing
         output_file.close()
         textfile.close()
+    
+    # returns whether text file was found
     return(found_text_files)
 
 # creates a function that deidentifies each file in a folder and all subfolders recursively
 def deidentify_recursive(directory, overwrite=False):
+    # creates control variable to check if there were any text files in the provided folder
     found_text_files = False
+    
+    # walks folder structure to get all files in all folders
     for dirpath, dirnames, files in os.walk(directory):
+        # for every file found in a folder
         for name in files:
+            # calls function that deidentifies an individual file
             is_this_a_text_file = deidentify_file(os.path.join(dirpath, name), overwrite)
+            
+            # changes the variable if a text file was processed
             if is_this_a_text_file:
                 found_text_files = True
-    #If no .txt texts were found in the directory, it prints "No text files found in the directory"
+                
+    # if no .txt texts were found in the directory, it prints "No text files found in the directory"
     if not found_text_files:
         print('No text files found in the directory.')
 
-# checks if the users has specified directory with the .txt files to be deidentified
+# checks if the user has specified directory with the .txt files to be deidentified
 if args.dir:
     # calls function that deidentifies each file in a folder and all subfolders recursively
     deidentify_recursive(args.dir)
