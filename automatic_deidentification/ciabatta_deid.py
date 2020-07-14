@@ -92,64 +92,68 @@ def deidentify_file(filename, overwrite=False):
         # if output directory does not exist already, it creates one
         if not os.path.exists(directory):
             os.makedirs(directory)
+            
+        try:
+            # opens and reads in the file
+            textfile = open(filename, 'r')
 
-        # opens and reads in the file
-        textfile = open(filename, 'r')
+            # opens the output file and writes in it
+            output_file = open(output_filename, "w")
 
-        # opens the output file and writes in it
-        output_file = open(output_filename, "w")
+            found_text_body=False
+            # loops through every line in the file
 
-        found_text_body=False
-        # loops through every line in the file
+            for line in textfile:
+                # strips spaces at the end of the line
+                line_nobreaks = line.strip()
 
-        for line in textfile:
-            # strips spaces at the end of the line
-            line_nobreaks = line.strip()
-
-            # if there's text in the line (if the line is not empty)
-            if line_nobreaks != '':
-                # if the last character in the line is a period, semicolon, exclamation or question mark
-                if line_nobreaks[-1] in ['.', ';', '!', '?']:
-                    # creates a found_text_body variable to identify the body of the text
-                    found_text_body = True
+                # if there's text in the line (if the line is not empty)
+                if line_nobreaks != '':
+                    # if the last character in the line is a period, semicolon, exclamation or question mark
+                    if line_nobreaks[-1] in ['.', ';', '!', '?']:
+                        # creates a found_text_body variable to identify the body of the text
+                        found_text_body = True
 
 
-            # calls function to clean names from the lines before the body of the text
-            # (if removing names makes line empty, the line
-            # had only names and nothing else)
-            line_no_names = clean_names_from_line(line)
+                # calls function to clean names from the lines before the body of the text
+                # (if removing names makes line empty, the line
+                # had only names and nothing else)
+                line_no_names = clean_names_from_line(line)
 
-            # calls function to clean email addresses from the lines before the body of the text
-            # (if removing email addresses makes line empty, the line
-            # had only email addresses and nothing else)
-            line_no_emails = clean_email_from_line(line)
+                # calls function to clean email addresses from the lines before the body of the text
+                # (if removing email addresses makes line empty, the line
+                # had only email addresses and nothing else)
+                line_no_emails = clean_email_from_line(line)
 
-            if (line_no_names != '' and
-                    line_no_emails != ''):
+                if (line_no_names != '' and
+                        line_no_emails != ''):
 
-                # check if line is a Word comment
-                if not line[0] == '[':
-                    # removes other Word comments, e.g., [AP 1]
-                    new_line2 = re.sub(r'\[([A-Z][A-Z]\s?[0-9]{1,2})\]', r'', line)
+                    # check if line is a Word comment
+                    if not line[0] == '[':
+                        # removes other Word comments, e.g., [AP 1]
+                        new_line2 = re.sub(r'\[([A-Z][A-Z]\s?[0-9]{1,2})\]', r'', line)
 
-                    # if the body of the texts has not started yet
-                    if not found_text_body:
-                        # removes any remaining emails
-                        new_line2 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'', new_line2)
-                    # if we are in the body of the text already
-                    else:
-                        # replaces emails with <email>
-                        new_line2 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'<email>', new_line2)
+                        # if the body of the texts has not started yet
+                        if not found_text_body:
+                            # removes any remaining emails
+                            new_line2 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'', new_line2)
+                        # if we are in the body of the text already
+                        else:
+                            # replaces emails with <email>
+                            new_line2 = re.sub(r'([A-Z]|[a-z]|[0-9]|\.)+@.+', r'<email>', new_line2)
 
-                    # removes any exra spaces
-                    new_line2 = re.sub(r'\s+', r' ', new_line2)
+                        # removes any exra spaces
+                        new_line2 = re.sub(r'\s+', r' ', new_line2)
 
-                    # writes out line and linebreak for cross-platform use
-                    output_file.write(new_line2.strip() + '\r\n')
-
-        # closes the file after writing
-        output_file.close()
-        textfile.close()
+                        # writes out line and linebreak for cross-platform use
+                        output_file.write(new_line2.strip() + '\r\n')
+            except:
+                print("File " + filename + " could not be opened. Check if the file is UTF-8 encoded. If not, use the Corpus Text Processor Tool.")
+                
+            # closes the file after writing
+            output_file.close()
+            textfile.close()
+        
 
     # returns whether text file was found
     return(found_text_files)
