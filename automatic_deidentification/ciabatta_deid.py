@@ -146,7 +146,8 @@ def deidentify_file(filename, overwrite=False):
                         new_line2 = re.sub(r'\s+', r' ', new_line2)
 
                         # writes out line and linebreak for cross-platform use
-                        output_file.write(new_line2.strip() + '\r\n')
+                        new_line3 = re.sub('\r+\n', '', new_line2)
+                        output_file.write(new_line3 + '\r\n')
         except:
             print("File " + filename + " could not be opened. Check if the file is UTF-8 encoded. If not, use the Corpus Text Processor Tool.")
                 
