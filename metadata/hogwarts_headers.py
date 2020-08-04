@@ -8,7 +8,7 @@
 #Usage examples
 #Run the line below from the terminal on a Mac or command prompr on windows:
 #Mac OS example:
-#    python add_headers.py --directory=Spring\ 2018/normalized/ --master_file=Metadata_Spring_2018_updated.csv
+#    python hogwarts_headers.py --directory=standardized/ --master_file=metadata_folder/master_student_data.xlsx
 # Windows example:
 #    python add_headers.py --directory="Fall 2018/normalized/" --master_file="Metadata_Fall_2018_updated.csv"
 
