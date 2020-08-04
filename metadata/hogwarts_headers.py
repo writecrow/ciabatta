@@ -132,11 +132,11 @@ def add_header_to_file(filename, master, overwrite=False):
             if 'Series' not in output_filename:
                 term = filtered_master2['term'].to_string(index=False)
                 term = term.strip()
-                #path = "files_with_headers/" + term + "/ENGL " + course+ "/" + assignment + "/" + draft + "/"
                 
+                # build path to new file (i.e., output file)
                 new_folder = "files_with_headers"
                 cwd = os.getcwd()
-                path = os.path.join(cwd, new_folder, term, course, assignment, draft)
+                path = os.path.join(cwd, new_folder, term, "ENGL " + course, assignment, draft)
 
                 if not os.path.exists(path):
                     os.makedirs(path)
