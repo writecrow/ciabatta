@@ -1,23 +1,25 @@
 #!/usr/local/bin/python3
 # -*- coding: utf-8 -*-
 
-# DESCRIPTION: Given an excel file and text files passed as arguments to the script,
-# metadata headers are added to each individual text files
+# DESCRIPTION:
+# Given a folder with .txt files (inlcuding subfolders) and an excel file with metadata,
+# the script extracts information from the excel file and adds metadata headers to each individual text file.
 #
-# Mac OS example:
+#Usage examples
+#Run the line below from the terminal on a Mac or command prompr on windows:
+#Mac OS example:
 #    python add_headers.py --directory=Spring\ 2018/normalized/ --master_file=Metadata_Spring_2018_updated.csv
-#    python add_headers.py --directory=Fall\ 2018/normalized/ --master_file=Metadata_Fall_2018_updated.csv
-#    python add_headers.py --directory=../../../Fall\ 2017/normalized/ --master_file=../../../Metadata/Fall\ 2017/Metadata_Fall_2017.xlsx
-# Windows run with Anaconda Prompt example:
+# Windows example:
 #    python add_headers.py --directory="Fall 2018/normalized/" --master_file="Metadata_Fall_2018_updated.csv"
 
+#imports packages
 import argparse
 import sys
 import re
 import os
 import pandas
 
-# Define the way we retrieve arguments sent to the script.
+# Lists the required arguments (e.g. --directory=) sent to the script
 parser = argparse.ArgumentParser(description='Add Headers to Individual Textfile')
 parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action="store", dest='dir', default='')
@@ -25,6 +27,8 @@ parser.add_argument('--master_file', action="store", dest='master_file', default
 args = parser.parse_args()
 
 
+# creates a function to add the metadata headers to each individual text file
+# the function has two arguments the files and the spreadsheet with metadata.
 def add_header_to_file(filename, master, overwrite=False):
     found_text_files = False
     if '.txt' in filename:
@@ -104,7 +108,7 @@ def add_header_to_file(filename, master, overwrite=False):
 
             institution_code = re.sub(r'[a-z\s]', r'', filtered_master2['institution'].to_string(index=False))
 
-            #course assignment draft country yearinschool gender studentID institution '.txt'
+            #course assignment draft country year in school gender studentID institution '.txt'
             output_filename = ''
             output_filename += course
             output_filename += '_'
