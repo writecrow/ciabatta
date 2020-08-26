@@ -4,13 +4,14 @@
 # DESCRIPTION:
 # Given a folder with .txt files (inlcuding subfolders) and an excel file with metadata,
 # the script extracts information from the excel file and adds metadata headers to each individual text file.
-#
+
 #Usage examples
 #Run the line below from the terminal on a Mac or command prompr on windows:
 #Mac OS example:
-#    python hogwarts_headers.py --directory=standardized/ --master_file=metadata_folder/master_student_data.xlsx
+#    python hogwarts_headers.py --directory=standardized --master_file=metadata_folder/master_student_data.xlsx
+
 # Windows example:
-#    python add_headers.py --directory="Fall 2018/normalized/" --master_file="Metadata_Fall_2018_updated.csv"
+#    python hogwarts_headers.py --directory=standardized --master_file=metadata_folder\master_student_data.xlsx
 
 #imports packages
 import argparse
@@ -30,9 +31,15 @@ args = parser.parse_args()
 # creates a function to add the metadata headers to each individual text file
 # the function has two arguments the files and the spreadsheet with metadata.
 def add_header_to_file(filename, master, overwrite=False):
+    # only works with .txt files
     found_text_files = False
     if '.txt' in filename:
+        # indicates that this is a .txt file
         found_text_files = True
+        # splits filename by "- " (dash and a space)
+        # this only works with this example of a filename: 348719-1216170 - Letitia Reyer- 30-Mar-18 632 PM
+        # this filename pattern comes from D2L course management system
+        # so you might have to change the split pattern below to extract student names from your filenames
         filename_parts = filename.split('- ')
         print("filename parts: ", filename_parts)
         student_name = re.sub(r'\.txt', r'', filename_parts[1])
