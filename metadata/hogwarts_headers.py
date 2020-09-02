@@ -5,13 +5,14 @@
 # Given a folder with .txt files (inlcuding subfolders) and an excel file with metadata,
 # the script extracts information from the excel file and adds metadata headers to each individual text file.
 
-#Usage examples
-#Run the line below from the terminal on a Mac or command prompr on windows:
-#Mac OS example:
-#    python hogwarts_headers.py --directory=standardized --master_file=metadata_folder/master_student_data.xlsx
+# Usage examples
+# Run the line below from the terminal on a Mac or command prompt on Windows:
+
+# Mac OS example:
+# python hogwarts_headers.py --directory=standardized --master_file=metadata_folder/master_student_data.xlsx
 
 # Windows example:
-#    python hogwarts_headers.py --directory=standardized --master_file=metadata_folder\master_student_data.xlsx
+# python hogwarts_headers.py --directory=standardized --master_file=metadata_folder\master_student_data.xlsx
 
 #imports packages
 import argparse
@@ -20,7 +21,7 @@ import re
 import os
 import pandas
 
-# Lists the required arguments (e.g. --directory=) sent to the script
+# lists the required arguments (e.g. --directory=) sent to the script
 parser = argparse.ArgumentParser(description='Add Headers to Individual Textfile')
 parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action="store", dest='dir', default='')
@@ -41,18 +42,23 @@ def add_header_to_file(filename, master, overwrite=False):
         # this filename pattern comes from D2L course management system
         # so you might have to change the split pattern below to extract student names from your filenames
         filename_parts = filename.split('- ')
-        print("filename parts: ", filename_parts)
         student_name = re.sub(r'\.txt', r'', filename_parts[1])
         student_name = re.sub(r'\s+', r' ', student_name)
-        print("Student name: ", student_name)
+        # if after splitting the name the last charcter in the name is -, then ignore that character
         if student_name[-1] == '-':
             student_name = student_name[:-1]
+        # split student name by space
         student_name_parts = student_name.split()
+        # if the student has more than two names, 
+        # it prints a message: "File has student name with more than two names" and indicates the filename
         if len(student_name_parts) != 2:
             print('***********************************************')
             print('File has student name with more than two names: ' + filename)
             print(student_name_parts)
-
+        # filter the metadata spreadsheet by last and first names
+        # compare if the student last and first name in the spreadhseet matches the student last and first name in the filename
+        # if it can't match the first and last name from the file to the spreadsheet, 
+        # it prints a message: "Unable to find metadata for this file" and indicates the filename
         filtered_master1 = master[master['Last Name'] == student_name_parts[-1]]
         filtered_master2 = filtered_master1[filtered_master1['First Name'] == student_name_parts[0]]
         if filtered_master2.empty:
@@ -60,20 +66,25 @@ def add_header_to_file(filename, master, overwrite=False):
             print('Unable to find metadata for this file: ')
             print(filename)
             print(student_name_parts)
-
+        # if there are more rows in the metadata for a given file, 
+        # it prints a message: "More than one row in metadata for this file" and indicates the filename
         if filtered_master2.shape[0] > 1:
             print('***********************************************')
             print('More than one row in metadata for this file: ')
             print(filename)
             print(student_name_parts)
+        # otherwise, it opens each individual filename
         else:
             print('Adding headers to file ' + filename)
             textfile = open(filename, 'r')
+            # replaces Windows backslashes \ to Mac / in filenames
             not_windows_filename = re.sub(r'\\', r'/', filename)
+            # deletes ../ from filenames 
             clean_filename = re.sub(r'\.\.\/', r'', not_windows_filename)
+            # splits the filename by /
             filename_parts2 = clean_filename.split('/')
             print(filename_parts2)
-
+               
             course = filtered_master2['Catalog Nbr'].to_string(index=False)
             course = course.strip()
             course = re.sub(r'NaN', r'NA', course)
