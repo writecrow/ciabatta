@@ -84,24 +84,37 @@ def add_header_to_file(filename, master, overwrite=False):
             # splits the filename by /
             filename_parts2 = clean_filename.split('/')
             print(filename_parts2)
-               
+            
+            # retrieves course number from "Catalog Nbr" column in the metadata spreasheet
             course = filtered_master2['Catalog Nbr'].to_string(index=False)
+            # strips white spaces around the course number values in the column 
             course = course.strip()
+            # replaces NaN to NA in the course number column
             course = re.sub(r'NaN', r'NA', course)
-
+            
+            # gets the assignment code from the filename path (included in the folder structure)
             assignment = filename_parts2[3][:2]
+            # gets the assignment draft from the filename path (included in the folder structure)
             draft = filename_parts2[3][2:]
+            # removes D from the assignment draft
             draft = re.sub('D', '', draft)
-
+            
+            # retrieves country code from "Birth Country Code" column in the metadata spreasheet
             country_code = filtered_master2['Birth Country Code'].to_string(index=False)
+            # strips white spaces around the country code values in the column 
             country_code = country_code.strip()
+            # replaces NaN to NA in the "Birth Country Code" column
             country_code = re.sub(r'NaN', r'NAN', country_code)
 
-
+            # retrieves year in school from "Acad Level" column in the metadata spreasheet
             year_in_school = filtered_master2['Acad Level'].to_string(index=False)
+            # strips white spaces around the Acad Level values in the column 
             year_in_school = year_in_school.strip()
+            # creates a variable and assigns it "NA"
             year_in_school_numeric = 'NA'
-
+            
+            # replaces numerical values for the year in school (1,2, etc) with words (freshman, sophomore, etc)
+            # if it is not one of the four numbers (1,2,3 or 4), then it assigns "NA"
             if year_in_school not in ['1','2','3','4']:
                 if year_in_school.lower() == 'freshman':
                     year_in_school_numeric = '1'
@@ -115,15 +128,23 @@ def add_header_to_file(filename, master, overwrite=False):
                     year_in_school_numeric = 'NA'
             else:
                 year_in_school_numeric = year_in_school
-
+            
+            # retrieves year in school from "Gender" column in the metadata spreasheet
             gender = filtered_master2['Gender'].to_string(index=False)
+            # strips white spaces around "Gender" column values in the spreasheet
             gender = gender.strip()
+            # replaces NaN to NA
             gender = re.sub(r'NaN', r'NA', gender)
-
+            
+            # retrieves Crow ID from "Crow ID" column in the metadata spreasheet
             crow_id = filtered_master2['Crow ID'].to_string(index=False)
+            # strips white spaces around "Crow ID" column values in the spreasheet
             crow_id = crow_id.strip()
+            # replaces NaN to NA
             crow_id = re.sub(r'NaN', r'NA', crow_id)
-
+            
+            # retrieves institution values from "institution" column in the metadata spreasheet (which was University of Arizona) 
+            # and removes all lowercase characters from the string resulting in UA as an institution code
             institution_code = re.sub(r'[a-z\s]', r'', filtered_master2['institution'].to_string(index=False))
 
             #course assignment draft country year in school gender studentID institution '.txt'
