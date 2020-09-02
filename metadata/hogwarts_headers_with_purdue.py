@@ -25,16 +25,17 @@ parser = argparse.ArgumentParser(description='Add Headers to Individual Textfile
 parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action="store", dest='dir', default='')
 parser.add_argument('--master_file', action="store", dest='master_file', default='')
+parser.add_argument('--cms', action="store", dest='cms', default='d2l')
 args = parser.parse_args()
 
-def add_header_common():  
+def add_header_common(filename, master_row, overwrite=False):
     textfile = open(filename, 'r')
     not_windows_filename = re.sub(r'\\', r'/', filename)
     clean_filename = re.sub(r'\.\.\/', r'', not_windows_filename)
     filename_parts2 = clean_filename.split('/')
     print(filename_parts2)
 
-    course = filtered_master2['Catalog Nbr'].to_string(index=False)
+    course = master_row['Catalog Nbr'].to_string(index=False)
     course = course.strip()
     course = re.sub(r'NaN', r'NA', course)
 
@@ -42,12 +43,12 @@ def add_header_common():
     draft = filename_parts2[3][2:]
     draft = re.sub('D', '', draft)
 
-    country_code = filtered_master2['Birth Country Code'].to_string(index=False)
+    country_code = master_row['Birth Country Code'].to_string(index=False)
     country_code = country_code.strip()
     country_code = re.sub(r'NaN', r'NAN', country_code)
 
 
-    year_in_school = filtered_master2['Acad Level'].to_string(index=False)
+    year_in_school = master_row['Acad Level'].to_string(index=False)
     year_in_school = year_in_school.strip()
     year_in_school_numeric = 'NA'
 
@@ -65,15 +66,15 @@ def add_header_common():
     else:
         year_in_school_numeric = year_in_school
 
-    gender = filtered_master2['Gender'].to_string(index=False)
+    gender = master_row['Gender'].to_string(index=False)
     gender = gender.strip()
     gender = re.sub(r'NaN', r'NA', gender)
 
-    crow_id = filtered_master2['Crow ID'].to_string(index=False)
+    crow_id = master_row['Crow ID'].to_string(index=False)
     crow_id = crow_id.strip()
     crow_id = re.sub(r'NaN', r'NA', crow_id)
 
-    institution_code = re.sub(r'[a-z\s]', r'', filtered_master2['institution'].to_string(index=False))
+    institution_code = re.sub(r'[a-z\s]', r'', master_row['institution'].to_string(index=False))
 
     #course assignment draft country year in school gender studentID institution '.txt'
     output_filename = ''
@@ -97,9 +98,9 @@ def add_header_common():
     output_filename = re.sub(r'__', r'_NA_', output_filename)
 
     if 'Series' not in output_filename:
-        term = filtered_master2['term'].to_string(index=False)
+        term = master_row['term'].to_string(index=False)
         term = term.strip()
-        
+
         # build path to new file (i.e., output file)
         new_folder = "files_with_headers"
         cwd = os.getcwd()
@@ -108,32 +109,34 @@ def add_header_common():
         if not os.path.exists(path):
             os.makedirs(path)
 
-        output_file = open(path + output_filename, 'w')
+        whole_path = os.path.join(path, output_filename)
+        output_file = open(whole_path, 'w')
+        print(path + output_filename)
 
-        country = filtered_master2['Birth Country Code'].to_string(index=False)
+        country = master_row['Birth Country Code'].to_string(index=False)
         country = country.strip()
 
-        institution = filtered_master2['institution'].to_string(index=False)
+        institution = master_row['institution'].to_string(index=False)
         institution = institution.strip()
 
         semester = term.split()[0]
         year = term.split()[1]
-        college = filtered_master2['College'].to_string(index=False)
-        program = filtered_master2['Major'].to_string(index=False)
-        TOEFL_COMPI = filtered_master2['TOEFL COMPI'].to_string(index=False)
-        TOEFL_Listening = filtered_master2['TOEFL Listening'].to_string(index=False)
-        TOEFL_Reading = filtered_master2['TOEFL Reading'].to_string(index=False)
-        TOEFL_Writing = filtered_master2['TOEFL Writing'].to_string(index=False)
-        TOEFL_Speaking = filtered_master2['TOEFL Speaking'].to_string(index=False)
-        IELTS_Overall = filtered_master2['IELTS Overall'].to_string(index=False)
-        IELTS_Listening = filtered_master2['IELTS Listening'].to_string(index=False)
-        IELTS_Reading = filtered_master2['IELTS Reading'].to_string(index=False)
-        IELTS_Writing = filtered_master2['IELTS Writing'].to_string(index=False)
-        IELTS_Speaking = filtered_master2['IELTS Speaking'].to_string(index=False)
-        instructor = filtered_master2['Instructor Code'].to_string(index=False)
-        #section = filtered_master2['Class Section'].to_string(index=False)
-        mode = filtered_master2['mode_of_course'].to_string(index=False)
-        length = filtered_master2['length_of_course'].to_string(index=False)
+        college = master_row['College'].to_string(index=False)
+        program = master_row['Major'].to_string(index=False)
+        TOEFL_COMPI = master_row['TOEFL COMPI'].to_string(index=False)
+        TOEFL_Listening = master_row['TOEFL Listening'].to_string(index=False)
+        TOEFL_Reading = master_row['TOEFL Reading'].to_string(index=False)
+        TOEFL_Writing = master_row['TOEFL Writing'].to_string(index=False)
+        TOEFL_Speaking = master_row['TOEFL Speaking'].to_string(index=False)
+        IELTS_Overall = master_row['IELTS Overall'].to_string(index=False)
+        IELTS_Listening = master_row['IELTS Listening'].to_string(index=False)
+        IELTS_Reading = master_row['IELTS Reading'].to_string(index=False)
+        IELTS_Writing = master_row['IELTS Writing'].to_string(index=False)
+        IELTS_Speaking = master_row['IELTS Speaking'].to_string(index=False)
+        instructor = master_row['Instructor Code'].to_string(index=False)
+        #section = master_row['Class Section'].to_string(index=False)
+        mode = master_row['mode_of_course'].to_string(index=False)
+        length = master_row['length_of_course'].to_string(index=False)
 
         college = college.strip()
         program = program.strip()
@@ -235,32 +238,31 @@ def add_header_common():
 
         output_file.close()
     textfile.close()
-    return(found_text_files)
 
 # creates a function to add the metadata headers to each individual text file
 # the function has two arguments the files and the spreadsheet with metadata.
-def add_header_to_file_purdue(filename, master, overwrite=False):
+def add_header_to_file_blackboard(filename, master, overwrite=False):
     found_text_files = False
-    if '.txt' in filename: #check the indent 
+    if '.txt' in filename: #check the indent
         found_text_files = True
 
         global career_account_list
-    
+
         for career_account in career_account_list:
             #print("career_account is:", career_account)
             if re.search('_'+str(career_account)+'_', filename):
                 print('>>>>> matched: ', '_'+career_account+'_', "is in", filename,'and adding headers...')
                 #print('>>>>> add header to',filename)
                 filtered_master = master[master['User_ID'] == career_account]
-                #add_header_common(filename, master)
+                add_header_common(filename, filtered_master, overwrite=False)
 
-def add_header_to_file_uarizona(filename, master, overwrite=False):
+def add_header_to_file_d2l(filename, master, overwrite=False):
     # only works with .txt files
     found_text_files = False
     if '.txt' in filename:
         # indicates that this is a .txt file
         found_text_files = True
-        
+
         filename_parts = filename.split('- ')
         print("filename parts: ", filename_parts)
         student_name = re.sub(r'\.txt', r'', filename_parts[1])
@@ -289,14 +291,18 @@ def add_header_to_file_uarizona(filename, master, overwrite=False):
             print(student_name_parts)
         else:
             print('Adding headers to file ' + filename)
-            add_header_common(filename)
+            add_header_common(filename, filtered_master2, overwrite=False)
+    return(found_text_files)
 
 
-def add_headers_recursive(directory, master, overwrite=False):
+def add_headers_recursive(directory, master, cms, overwrite=False):
     found_text_files = False
     for dirpath, dirnames, files in os.walk(directory):
         for name in files:
-            is_this_a_text_file = add_header_to_file_uarizona(os.path.join(dirpath, name), master, overwrite)
+            if cms == "d2l":
+                is_this_a_text_file = add_header_to_file_d2l(os.path.join(dirpath, name), master, overwrite)
+            elif cms == "blackboard":
+                is_this_a_text_file = add_header_to_file_blackboard(os.path.join(dirpath, name), master, overwrite)
             if is_this_a_text_file:
                 found_text_files = True
     if not found_text_files:
@@ -314,6 +320,6 @@ if args.master_file and args.dir:
 
         career_account_list = master_data['User_ID'].tolist()
 
-    add_headers_recursive(args.dir, master_data, args.overwrite)
+    add_headers_recursive(args.dir, master_data, args.cms, args.overwrite)
 else:
     print('You need to supply a valid master file and directory with textfiles')
