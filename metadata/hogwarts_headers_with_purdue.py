@@ -14,7 +14,7 @@
 # Windows example:
 #    python hogwarts_headers.py --directory=standardized --master_file=metadata_folder\master_student_data.xlsx
 
-#imports packages
+# imports packages
 import argparse
 import sys
 import re
@@ -22,7 +22,7 @@ import os
 import pandas
 import yaml
 
-# Lists the required arguments (e.g. --directory=) sent to the script
+# lists the required arguments (e.g. --directory=) sent to the script
 parser = argparse.ArgumentParser(description='Add Headers to Individual Textfile')
 parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action="store", dest='dir', default='')
@@ -31,6 +31,8 @@ parser.add_argument('--cms', action="store", dest='cms', default='d2l')
 parser.add_argument('--config_file', action="store", dest='config_file', default='metadata_folder/config.yaml')
 args = parser.parse_args()
 
+# creates a function to add the metadata headers to each individual text file
+# depending on metadata type
 def add_header_common(filename, master_row, config_file, overwrite=False):
     textfile = open(filename, 'r')
     config_file = open(config_file, 'r')
@@ -43,23 +45,35 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     filename_parts2 = clean_filename.split('/') # change this to os.path
     print(filename_parts2)
 
+    # retrieves course number from "course" column in the metadata spreasheet
     course = master_row[column_specs['course']].to_string(index=False)
+    # strips white spaces around the course number values in the column 
     course = course.strip()
+    # replaces "NaN" to "NAN" for the course variable
     course = re.sub(r'NaN', r'NA', course)
 
+    # gets assignment and draft from the filename path (included in the folder structure)
     assignment = filename_parts2[3][:2]
     draft = filename_parts2[3][2:]
+    # replaces "D" for draft to an empty space
     draft = re.sub('D', '', draft)
-
+    
+    # retrieves country code from "country_code" column in the metadata spreasheet
     country_code = master_row[column_specs['country_code']].to_string(index=False)
+    # strips white spaces around the country_code values in the column 
     country_code = country_code.strip()
+    # replaces "NaN" to "NAN" for the country_code variable
     country_code = re.sub(r'NaN', r'NAN', country_code)
-
-
+    
+    # retrieves year in school from "year_in_school" column in the metadata spreasheet
     year_in_school = master_row[column_specs['year_in_school']].to_string(index=False)
+    # strips white spaces around the year_in_school values in the column 
     year_in_school = year_in_school.strip()
+    # creates a new variable for year in school and assigns it "NA"
     year_in_school_numeric = 'NA'
-
+    
+    # replaces numerical values for the year in school (1,2, etc) with words (freshman, sophomore, etc)
+    # if it is not one of the four numbers (1,2,3 or 4), then it assigns "NA"
     if year_in_school not in ['1','2','3','4']:
         if year_in_school.lower() == 'freshman':
             year_in_school_numeric = '1'
@@ -73,18 +87,26 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
             year_in_school_numeric = 'NA'
     else:
         year_in_school_numeric = year_in_school
-
+        
+    # retrieves year in school from "gender" column in the metadata spreasheet
     gender = master_row[column_specs['gender']].to_string(index=False)
+    # strips white spaces around gender column values in the spreasheet
     gender = gender.strip()
+    # replaces NaN to NA for gender
     gender = re.sub(r'NaN', r'NA', gender)
-
+    
+    # retrieves crow id from "crow_id" column in the metadata spreasheet
     crow_id = master_row[column_specs['crow_id']].to_string(index=False)
+    # strips white spaces around "crow_id" column values in the spreasheet
     crow_id = crow_id.strip()
+    # replaces NaN to NA in for crow ids
     crow_id = re.sub(r'NaN', r'NA', crow_id)
 
+    # retrieves institution values from "institution" column in the metadata spreasheet (which was University of Arizona) 
+    # and removes all lowercase characters from the string resulting in UA as an institution code
     institution_code = re.sub(r'[a-z\s]', r'', master_row[column_specs['institution_code']].to_string(index=False))
 
-    #course assignment draft country year in school gender studentID institution '.txt'
+    # creates filenames in the following format: 106_LN_1_CH_2_F_20034_UA.txt
     output_filename = ''
     output_filename += course
     output_filename += '_'
@@ -109,43 +131,70 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
         term = master_row[column_specs['term']].to_string(index=False)
         term = term.strip()
 
-        # build path to new file (i.e., output file)
+        # creates an output folder named "files_with_headers" with the term, course, assignment and draft subfolders
         new_folder = "files_with_headers"
         cwd = os.getcwd()
         path = os.path.join(cwd, new_folder, term, "ENGL " + course, assignment, draft)
-
+        
+        # checks if such a folder exists, if not, it creates it
         if not os.path.exists(path):
             os.makedirs(path)
-
+       
+        # specifies the path for the files to be written
         whole_path = os.path.join(path, output_filename)
+        # writes files
         output_file = open(whole_path, 'w')
         print(path + output_filename)
-
+        
+        # retrieves year in school from "country" column in the metadata spreasheet
         country = master_row[column_specs['country']].to_string(index=False)
+        
+        # removes white space around the country column values
         country = country.strip()
-
+        
+        # retrieves year in school from "institution" column in the metadata spreasheet
         institution = master_row['institution'].to_string(index=False)
         institution = institution.strip()
-
+        
+        # creates a semester variable from the first elements of the term variable
         semester = term.split()[0]
+        # creates a year variable from the second element of the term variable
         year = term.split()[1]
+        
+        # retrieves year in school from "college" column in the metadata spreasheet
         college = master_row[column_specs['college']].to_string(index=False)
+        # retrieves program from "program" column in the metadata spreasheet
         program = master_row[column_specs['program']].to_string(index=False)
+        # retrieves overall TOEFL scores from "TOEFL_COMPI" column in the metadata spreasheet
         TOEFL_COMPI = master_row[column_specs['TOEFL_COMPI']].to_string(index=False)
+        # retrieves TOEFL listening scores from "TOEFL_Listening" column in the metadata spreasheet
         TOEFL_Listening = master_row[column_specs['TOEFL_Listening']].to_string(index=False)
+        # retrieves TOEFL reading scores from "TOEFL_Reading" column in the metadata spreasheet
         TOEFL_Reading = master_row[column_specs['TOEFL_Reading']].to_string(index=False)
+        # retrieves TOEFL writing scores from "TOEFL_Writing" column in the metadata spreasheet
         TOEFL_Writing = master_row[column_specs['TOEFL_Writing']].to_string(index=False)
+        # retrieves TOEFL speaking scores from "TOEFL_Speaking" column in the metadata spreasheet
         TOEFL_Speaking = master_row[column_specs['TOEFL_Speaking']].to_string(index=False)
+        # retrieves overall IELTS scores from "IELTS_Overall" column in the metadata spreasheet
         IELTS_Overall = master_row[column_specs['IELTS_Overall']].to_string(index=False)
+        # retrieves IELTS listening scores from "IELTS_Listening" column in the metadata spreasheet
         IELTS_Listening = master_row[column_specs['IELTS_Listening']].to_string(index=False)
+        # retrieves IELTS reading scores from "IELTS_Reading" column in the metadata spreasheet
         IELTS_Reading = master_row[column_specs['IELTS_Reading']].to_string(index=False)
+        # retrieves IELTS writing scores from "IELTS_Writing" column in the metadata spreasheet
         IELTS_Writing = master_row[column_specs['IELTS_Writing']].to_string(index=False)
+        # retrieves IELTS speaking scores from "IELTS_Speaking" column in the metadata spreasheet
         IELTS_Speaking = master_row[column_specs['IELTS_Speaking']].to_string(index=False)
+        # retrieves instructor information from "instructor" column in the metadata spreasheet
         instructor = master_row[column_specs['instructor']].to_string(index=False)
         #section = master_row[column_specs['country']].to_string(index=False)
+        
+        # retrieves mode (e.g. face to face) from "mode" column in the metadata spreasheet
         mode = master_row[column_specs['mode']].to_string(index=False)
+        # retrieves course length (e.g. 16 weeks) from "length" column in the metadata spreasheet
         length = master_row[column_specs['length']].to_string(index=False)
 
+        # strips white spaces around the values from the following columns in the data
         college = college.strip()
         program = program.strip()
         TOEFL_COMPI = TOEFL_COMPI.strip()
@@ -162,7 +211,8 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
         #section = section.strip()
         mode = mode.strip()
         length = length.strip()
-
+        
+        # replaces "NaN" values to "NA"s
         country = re.sub(r'NaN', r'NA', country)
         TOEFL_COMPI = re.sub(r'NaN', r'NA', TOEFL_COMPI)
         TOEFL_Listening = re.sub(r'NaN', r'NA', TOEFL_Listening)
@@ -175,34 +225,42 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
         IELTS_Writing = re.sub(r'NaN', r'NA', IELTS_Writing)
         IELTS_Speaking = re.sub(r'NaN', r'NA', IELTS_Speaking)
 
+        # creates new variables to combine proficiency exam scores 
         proficiency_exam = ''
         exam_total = ''
         exam_reading = ''
         exam_listening = ''
         exam_speaking = ''
         exam_writing = ''
-
+        
+        # checks if the "TOEFL_COMPI" values are not "NA"s
         if TOEFL_COMPI != 'NA':
+            # if they are not "NA"s, then the proficiency exam is TOEFL
             proficiency_exam = 'TOEFL'
             exam_total = TOEFL_COMPI
             exam_reading = TOEFL_Reading
             exam_listening = TOEFL_Listening
             exam_speaking = TOEFL_Speaking
             exam_writing = TOEFL_Writing
+        # checks if the "IELTS_Overall" values are not "NA"s
         elif IELTS_Overall != 'NA':
+            # if they are not "NA"s, then the proficiency exam is IELTS
             proficiency_exam = 'IELTS'
             exam_total = IELTS_Overall
             exam_reading = IELTS_Reading
             exam_listening = IELTS_Listening
             exam_speaking = IELTS_Speaking
             exam_writing = IELTS_Writing
+        # checks if both the "IELTS_Overall" values and "TOEFL_COMPI" are not "NA"s
         elif TOEFL_COMPI != 'NA' and IELTS_Overall != 'NA':
+            # if they are not "NA"s, then the proficiency exams are both TOEFL and IELTS 
             proficiency_exam = 'TOEFL;IELTS'
             exam_total = TOEFL_COMPI + ';' + IELTS_Overall
             exam_reading = TOEFL_Reading + ';' + IELTS_Reading
             exam_listening = TOEFL_Listening + ';' + IELTS_Listening
             exam_speaking = TOEFL_Speaking + ';' + IELTS_Speaking
             exam_writing = TOEFL_Writing + ';' + IELTS_Writing
+        # if the conditions above are not met, the proficiency exam scores are not available
         else:
             proficiency_exam = 'NA'
             exam_total = 'NA'
@@ -213,7 +271,7 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
 
         course_prefix = fixed_expressions['course_prefix']
 
-        # write headers in
+        # write headers in the created files
         print("<Student ID: " + crow_id + ">", file = output_file)
         print("<Country: " + country + ">", file = output_file)
         print("<Institution: " + institution + ">", file = output_file)
@@ -250,8 +308,8 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     textfile.close()
     config_file.close()
 
-# creates a function to add the metadata headers to each individual text file
-# the function has two arguments the files and the spreadsheet with metadata.
+# creates a function specific to blackboard metadata, which uses career accounts to match
+# the spreadsheet data and filenames
 def add_header_to_file_blackboard(filename, master, config_file, overwrite=False):
     found_text_files = False
     if '.txt' in filename: #check the indent
@@ -268,34 +326,47 @@ def add_header_to_file_blackboard(filename, master, config_file, overwrite=False
                 add_header_common(filename, filtered_master, config_file, overwrite=False)
     return(found_text_files)
 
+# creates a function specific to d2l course management system metadata, which uses student names to match
+# the spreadsheet data and filenames
 def add_header_to_file_d2l(filename, master, config_file, overwrite=False):
     # only works with .txt files
     found_text_files = False
     if '.txt' in filename:
         # indicates that this is a .txt file
         found_text_files = True
-
+        # splits the filename by a dash with a space "- "
         filename_parts = filename.split('- ')
         print("filename parts: ", filename_parts)
+        # removes ".txt" extension from the filename
         student_name = re.sub(r'\.txt', r'', filename_parts[1])
+        # removes any extra spaces from the filename
         student_name = re.sub(r'\s+', r' ', student_name)
         print("Student name: ", student_name)
+        # checks to see if the last element of the student name is "-"
         if student_name[-1] == '-':
+            # if it is, it removes it
             student_name = student_name[:-1]
+        # splits the student name by white space
         student_name_parts = student_name.split()
+        # checks if the student name has more than two names
         if len(student_name_parts) != 2:
             print('***********************************************')
+            # if there are more than two names, it prints 'File has student name with more than two names: '
             print('File has student name with more than two names: ' + filename)
             print(student_name_parts)
-
+        
+        # retrieves last name from "Last Name" column in the metadata spreasheet
         filtered_master1 = master[master['Last Name'] == student_name_parts[-1]]
+        # retrieves first name from "First Name" column in the metadata spreasheet
         filtered_master2 = filtered_master1[filtered_master1['First Name'] == student_name_parts[0]]
+        # checks to see if the given student names exist in the metadata spreadsheet
         if filtered_master2.empty:
             print('***********************************************')
             print('Unable to find metadata for this file: ')
             print(filename)
             print(student_name_parts)
-
+        
+        # checks to see if there is more than one row for the same student in the metadata spreadsheet
         if filtered_master2.shape[0] > 1:
             print('***********************************************')
             print('More than one row in metadata for this file: ')
@@ -306,7 +377,7 @@ def add_header_to_file_d2l(filename, master, config_file, overwrite=False):
             add_header_common(filename, filtered_master2, config_file, overwrite=False)
     return(found_text_files)
 
-
+# creates a function that adds headers and changes filenames recursively on all the files in the specified directory
 def add_headers_recursive(directory, master, cms, config_file, overwrite=False):
     found_text_files = False
     for dirpath, dirnames, files in os.walk(directory):
