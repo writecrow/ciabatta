@@ -32,9 +32,11 @@ args = parser.parse_args()
 
 def add_header_common(filename, master_row, config_file, overwrite=False):
     textfile = open(filename, 'r')
-    not_windows_filename = re.sub(r'\\', r'/', filename)
-    clean_filename = re.sub(r'\.\.\/', r'', not_windows_filename)
-    filename_parts2 = clean_filename.split('/')
+    config_file = open(config_file, 'r')
+
+    not_windows_filename = re.sub(r'\\', r'/', filename) # change this to os.path
+    clean_filename = re.sub(r'\.\.\/', r'', not_windows_filename) # change this to os.path
+    filename_parts2 = clean_filename.split('/') # change this to os.path
     print(filename_parts2)
 
     course = master_row['Catalog Nbr'].to_string(index=False)
@@ -240,6 +242,7 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
 
         output_file.close()
     textfile.close()
+    config_file.close()
 
 # creates a function to add the metadata headers to each individual text file
 # the function has two arguments the files and the spreadsheet with metadata.
