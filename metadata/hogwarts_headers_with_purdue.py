@@ -19,6 +19,7 @@ import sys
 import re
 import os
 import pandas
+import yaml
 
 # Lists the required arguments (e.g. --directory=) sent to the script
 parser = argparse.ArgumentParser(description='Add Headers to Individual Textfile')
@@ -26,9 +27,10 @@ parser.add_argument('--overwrite', action='store_true')
 parser.add_argument('--directory', action="store", dest='dir', default='')
 parser.add_argument('--master_file', action="store", dest='master_file', default='')
 parser.add_argument('--cms', action="store", dest='cms', default='d2l')
+parser.add_argument('--config_file', action="store", dest='config_file', default='metadata_folder/config.yaml')
 args = parser.parse_args()
 
-def add_header_common(filename, master_row, overwrite=False):
+def add_header_common(filename, master_row, config_file, overwrite=False):
     textfile = open(filename, 'r')
     not_windows_filename = re.sub(r'\\', r'/', filename)
     clean_filename = re.sub(r'\.\.\/', r'', not_windows_filename)
@@ -241,12 +243,12 @@ def add_header_common(filename, master_row, overwrite=False):
 
 # creates a function to add the metadata headers to each individual text file
 # the function has two arguments the files and the spreadsheet with metadata.
-def add_header_to_file_blackboard(filename, master, overwrite=False):
+def add_header_to_file_blackboard(filename, master, config_file, overwrite=False):
     found_text_files = False
     if '.txt' in filename: #check the indent
         found_text_files = True
 
-        global career_account_list
+        career_account_list = master_data['User_ID'].tolist()
 
         for career_account in career_account_list:
             #print("career_account is:", career_account)
@@ -254,9 +256,9 @@ def add_header_to_file_blackboard(filename, master, overwrite=False):
                 print('>>>>> matched: ', '_'+career_account+'_', "is in", filename,'and adding headers...')
                 #print('>>>>> add header to',filename)
                 filtered_master = master[master['User_ID'] == career_account]
-                add_header_common(filename, filtered_master, overwrite=False)
+                add_header_common(filename, filtered_master, config_file, overwrite=False)
 
-def add_header_to_file_d2l(filename, master, overwrite=False):
+def add_header_to_file_d2l(filename, master, config_file, overwrite=False):
     # only works with .txt files
     found_text_files = False
     if '.txt' in filename:
@@ -291,18 +293,18 @@ def add_header_to_file_d2l(filename, master, overwrite=False):
             print(student_name_parts)
         else:
             print('Adding headers to file ' + filename)
-            add_header_common(filename, filtered_master2, overwrite=False)
+            add_header_common(filename, filtered_master2, config_file, overwrite=False)
     return(found_text_files)
 
 
-def add_headers_recursive(directory, master, cms, overwrite=False):
+def add_headers_recursive(directory, master, cms, config_file, overwrite=False):
     found_text_files = False
     for dirpath, dirnames, files in os.walk(directory):
         for name in files:
             if cms == "d2l":
-                is_this_a_text_file = add_header_to_file_d2l(os.path.join(dirpath, name), master, overwrite)
+                is_this_a_text_file = add_header_to_file_d2l(os.path.join(dirpath, name), master, config_file, overwrite)
             elif cms == "blackboard":
-                is_this_a_text_file = add_header_to_file_blackboard(os.path.join(dirpath, name), master, overwrite)
+                is_this_a_text_file = add_header_to_file_blackboard(os.path.join(dirpath, name), master, config_file, overwrite)
             if is_this_a_text_file:
                 found_text_files = True
     if not found_text_files:
@@ -313,13 +315,9 @@ if args.master_file and args.dir:
         master_file = pandas.ExcelFile(args.master_file)
         master_data = pandas.read_excel(master_file)
 
-        career_account_list = master_data['User_ID'].tolist()
-
     elif '.csv' in args.master_file:
         master_data = pandas.read_csv(args.master_file)
 
-        career_account_list = master_data['User_ID'].tolist()
-
-    add_headers_recursive(args.dir, master_data, args.cms, args.overwrite)
+    add_headers_recursive(args.dir, master_data, args.cms, args.config_file, args.overwrite)
 else:
     print('You need to supply a valid master file and directory with textfiles')
