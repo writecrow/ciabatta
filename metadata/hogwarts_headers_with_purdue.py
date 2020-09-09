@@ -375,22 +375,32 @@ def add_header_to_file_d2l(filename, master, config_file, overwrite=False):
         else:
             print('Adding headers to file ' + filename)
             add_header_common(filename, filtered_master2, config_file, overwrite=False)
+    
+    # returns whether text file was found
     return(found_text_files)
 
 # creates a function that adds headers and changes filenames recursively on all the files in the specified directory
 def add_headers_recursive(directory, master, cms, config_file, overwrite=False):
+    # creates control variable to check if there were any text files in the provided folder
     found_text_files = False
+    # walks folder structure to get all files in all folders
     for dirpath, dirnames, files in os.walk(directory):
+        # for every file found in a folder
         for name in files:
             if cms == "d2l":
+                # calls function that add headers to an individual file specific to d2l
                 is_this_a_text_file = add_header_to_file_d2l(os.path.join(dirpath, name), master, config_file, overwrite)
             elif cms == "blackboard":
+                # calls function that add headers to an individual file specific to blackboard
                 is_this_a_text_file = add_header_to_file_blackboard(os.path.join(dirpath, name), master, config_file, overwrite)
+            # changes the variable if a text file was processed
             if is_this_a_text_file:
                 found_text_files = True
+    # if no .txt texts were found in the directory, it prints "No text files found in the directory"
     if not found_text_files:
         print('No text files found in the directory.')
 
+# checks if the user has specified the master student file (excel or csv file)
 if args.master_file and args.dir:
     if '.xls' in args.master_file:
         master_file = pandas.ExcelFile(args.master_file)
@@ -398,6 +408,11 @@ if args.master_file and args.dir:
 
     elif '.csv' in args.master_file:
         master_data = pandas.read_csv(args.master_file)
+   
+    # calls function that adds headers to each file in a folder and all subfolders recursively
+    deidentify_recursive(args.dir)
+else:
+    print('You need to supply a directory with textfiles')
 
     add_headers_recursive(args.dir, master_data, args.cms, args.config_file, args.overwrite)
 else:
