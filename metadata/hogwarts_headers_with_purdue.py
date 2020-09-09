@@ -408,12 +408,10 @@ if args.master_file and args.dir:
 
     elif '.csv' in args.master_file:
         master_data = pandas.read_csv(args.master_file)
-   
-    # calls function that adds headers to each file in a folder and all subfolders recursively
-    deidentify_recursive(args.dir)
 else:
     print('You need to supply a directory with textfiles')
-
+    
+    # calls function that adds headers to each file in a folder and all subfolders recursively
     add_headers_recursive(args.dir, master_data, args.cms, args.config_file, args.overwrite)
 else:
     print('You need to supply a valid master file and directory with textfiles')
