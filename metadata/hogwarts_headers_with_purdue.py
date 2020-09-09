@@ -8,7 +8,8 @@
 #Usage examples
 #Run the line below from the terminal on a Mac or command prompr on windows:
 #Mac OS example:
-#    python hogwarts_headers.py --directory=standardized --master_file=metadata_folder/master_student_data.xlsx
+#    python hogwarts_headers_with_purdue.py --directory=standardized --master_file=metadata_folder/master_student_data.xlsx
+#    python hogwarts_headers_with_purdue.py --directory=standardized/10600 --master_file=metadata_folder/purdue_registrar_data.xlsx --cms=blackboard --config_file=metadata_folder/config_purdue.yaml
 
 # Windows example:
 #    python hogwarts_headers.py --directory=standardized --master_file=metadata_folder\master_student_data.xlsx
@@ -34,13 +35,15 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     textfile = open(filename, 'r')
     config_file = open(config_file, 'r')
     headers_list = yaml.load(config_file, Loader=yaml.FullLoader)
+    column_specs = headers_list['column_specs']
+    fixed_expressions = headers_list['fixed_expressions']
 
     not_windows_filename = re.sub(r'\\', r'/', filename) # change this to os.path
     clean_filename = re.sub(r'\.\.\/', r'', not_windows_filename) # change this to os.path
     filename_parts2 = clean_filename.split('/') # change this to os.path
     print(filename_parts2)
 
-    course = master_row[headers_list['column_specs']['course']].to_string(index=False)
+    course = master_row[column_specs['course']].to_string(index=False)
     course = course.strip()
     course = re.sub(r'NaN', r'NA', course)
 
@@ -48,12 +51,12 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     draft = filename_parts2[3][2:]
     draft = re.sub('D', '', draft)
 
-    country_code = master_row['Birth Country Code'].to_string(index=False)
+    country_code = master_row[column_specs['country_code']].to_string(index=False)
     country_code = country_code.strip()
     country_code = re.sub(r'NaN', r'NAN', country_code)
 
 
-    year_in_school = master_row['Acad Level'].to_string(index=False)
+    year_in_school = master_row[column_specs['year_in_school']].to_string(index=False)
     year_in_school = year_in_school.strip()
     year_in_school_numeric = 'NA'
 
@@ -71,15 +74,15 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     else:
         year_in_school_numeric = year_in_school
 
-    gender = master_row['Gender'].to_string(index=False)
+    gender = master_row[column_specs['gender']].to_string(index=False)
     gender = gender.strip()
     gender = re.sub(r'NaN', r'NA', gender)
 
-    crow_id = master_row['Crow ID'].to_string(index=False)
+    crow_id = master_row[column_specs['crow_id']].to_string(index=False)
     crow_id = crow_id.strip()
     crow_id = re.sub(r'NaN', r'NA', crow_id)
 
-    institution_code = re.sub(r'[a-z\s]', r'', master_row['institution'].to_string(index=False))
+    institution_code = re.sub(r'[a-z\s]', r'', master_row[column_specs['institution_code']].to_string(index=False))
 
     #course assignment draft country year in school gender studentID institution '.txt'
     output_filename = ''
@@ -103,7 +106,7 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     output_filename = re.sub(r'__', r'_NA_', output_filename)
 
     if 'Series' not in output_filename:
-        term = master_row['term'].to_string(index=False)
+        term = master_row[column_specs['term']].to_string(index=False)
         term = term.strip()
 
         # build path to new file (i.e., output file)
@@ -118,7 +121,7 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
         output_file = open(whole_path, 'w')
         print(path + output_filename)
 
-        country = master_row['Birth Country Code'].to_string(index=False)
+        country = master_row[column_specs['country']].to_string(index=False)
         country = country.strip()
 
         institution = master_row['institution'].to_string(index=False)
@@ -126,22 +129,22 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
 
         semester = term.split()[0]
         year = term.split()[1]
-        college = master_row['College'].to_string(index=False)
-        program = master_row['Major'].to_string(index=False)
-        TOEFL_COMPI = master_row['TOEFL COMPI'].to_string(index=False)
-        TOEFL_Listening = master_row['TOEFL Listening'].to_string(index=False)
-        TOEFL_Reading = master_row['TOEFL Reading'].to_string(index=False)
-        TOEFL_Writing = master_row['TOEFL Writing'].to_string(index=False)
-        TOEFL_Speaking = master_row['TOEFL Speaking'].to_string(index=False)
-        IELTS_Overall = master_row['IELTS Overall'].to_string(index=False)
-        IELTS_Listening = master_row['IELTS Listening'].to_string(index=False)
-        IELTS_Reading = master_row['IELTS Reading'].to_string(index=False)
-        IELTS_Writing = master_row['IELTS Writing'].to_string(index=False)
-        IELTS_Speaking = master_row['IELTS Speaking'].to_string(index=False)
-        instructor = master_row['Instructor Code'].to_string(index=False)
-        #section = master_row['Class Section'].to_string(index=False)
-        mode = master_row['mode_of_course'].to_string(index=False)
-        length = master_row['length_of_course'].to_string(index=False)
+        college = master_row[column_specs['college']].to_string(index=False)
+        program = master_row[column_specs['program']].to_string(index=False)
+        TOEFL_COMPI = master_row[column_specs['TOEFL_COMPI']].to_string(index=False)
+        TOEFL_Listening = master_row[column_specs['TOEFL_Listening']].to_string(index=False)
+        TOEFL_Reading = master_row[column_specs['TOEFL_Reading']].to_string(index=False)
+        TOEFL_Writing = master_row[column_specs['TOEFL_Writing']].to_string(index=False)
+        TOEFL_Speaking = master_row[column_specs['TOEFL_Speaking']].to_string(index=False)
+        IELTS_Overall = master_row[column_specs['IELTS_Overall']].to_string(index=False)
+        IELTS_Listening = master_row[column_specs['IELTS_Listening']].to_string(index=False)
+        IELTS_Reading = master_row[column_specs['IELTS_Reading']].to_string(index=False)
+        IELTS_Writing = master_row[column_specs['IELTS_Writing']].to_string(index=False)
+        IELTS_Speaking = master_row[column_specs['IELTS_Speaking']].to_string(index=False)
+        instructor = master_row[column_specs['instructor']].to_string(index=False)
+        #section = master_row[column_specs['country']].to_string(index=False)
+        mode = master_row[column_specs['mode']].to_string(index=False)
+        length = master_row[column_specs['length']].to_string(index=False)
 
         college = college.strip()
         program = program.strip()
@@ -208,11 +211,13 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
             exam_speaking = 'NA'
             exam_writing = 'NA'
 
+        course_prefix = fixed_expressions['course_prefix']
+
         # write headers in
         print("<Student ID: " + crow_id + ">", file = output_file)
         print("<Country: " + country + ">", file = output_file)
         print("<Institution: " + institution + ">", file = output_file)
-        print("<Course: ENGL " + course + ">", file = output_file)
+        print("<Course: " + course_prefix + " " + course + ">", file = output_file)
         print("<Mode: " + mode + ">", file = output_file)
         print("<Length: " + length + ">", file = output_file)
         print("<Assignment: " + assignment + ">", file = output_file)
@@ -261,6 +266,7 @@ def add_header_to_file_blackboard(filename, master, config_file, overwrite=False
                 #print('>>>>> add header to',filename)
                 filtered_master = master[master['User_ID'] == career_account]
                 add_header_common(filename, filtered_master, config_file, overwrite=False)
+    return(found_text_files)
 
 def add_header_to_file_d2l(filename, master, config_file, overwrite=False):
     # only works with .txt files
