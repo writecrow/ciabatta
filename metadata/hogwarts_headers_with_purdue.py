@@ -8,11 +8,16 @@
 #Usage examples
 #Run the line below from the terminal on a Mac or command prompr on windows:
 #Mac OS example:
+#D2L
 #    python hogwarts_headers_with_purdue.py --directory=standardized --master_file=metadata_folder/master_student_data.xlsx
+#BLACBOARD
 #    python hogwarts_headers_with_purdue.py --directory=standardized/10600 --master_file=metadata_folder/purdue_registrar_data.xlsx --cms=blackboard --config_file=metadata_folder/config_purdue.yaml
 
 # Windows example:
+#D2L
 #    python hogwarts_headers.py --directory=standardized --master_file=metadata_folder\master_student_data.xlsx
+#BLACKBOARD
+#   python hogwarts_headers_with_purdue.py --directory=standardized\10600 --master_file=metadata_folder\purdue_registrar_data.xlsx --cms=blackboard --config_file=metadata_folder\config_purdue.yaml
 
 # imports packages
 import argparse
@@ -88,7 +93,7 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     else:
         year_in_school_numeric = year_in_school
         
-    # retrieves year in school from "gender" column in the metadata spreasheet
+    # retrieves gender from "gender" column in the metadata spreasheet
     gender = master_row[column_specs['gender']].to_string(index=False)
     # strips white spaces around gender column values in the spreasheet
     gender = gender.strip()
@@ -146,13 +151,13 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
         output_file = open(whole_path, 'w')
         print(path + output_filename)
         
-        # retrieves year in school from "country" column in the metadata spreasheet
+        # retrieves country from "country" column in the metadata spreasheet
         country = master_row[column_specs['country']].to_string(index=False)
         
         # removes white space around the country column values
         country = country.strip()
         
-        # retrieves year in school from "institution" column in the metadata spreasheet
+        # retrieves institution from "institution" column in the metadata spreasheet
         institution = master_row['institution'].to_string(index=False)
         institution = institution.strip()
         
@@ -161,7 +166,7 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
         # creates a year variable from the second element of the term variable
         year = term.split()[1]
         
-        # retrieves year in school from "college" column in the metadata spreasheet
+        # retrieves college from "college" column in the metadata spreasheet
         college = master_row[column_specs['college']].to_string(index=False)
         # retrieves program from "program" column in the metadata spreasheet
         program = master_row[column_specs['program']].to_string(index=False)
@@ -271,7 +276,7 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
 
         course_prefix = fixed_expressions['course_prefix']
 
-        # write headers in the created files
+        # write headers in the files created
         print("<Student ID: " + crow_id + ">", file = output_file)
         print("<Country: " + country + ">", file = output_file)
         print("<Institution: " + institution + ">", file = output_file)
@@ -318,10 +323,8 @@ def add_header_to_file_blackboard(filename, master, config_file, overwrite=False
         career_account_list = master_data['User_ID'].tolist()
 
         for career_account in career_account_list:
-            #print("career_account is:", career_account)
             if re.search('_'+str(career_account)+'_', filename):
                 print('>>>>> matched: ', '_'+career_account+'_', "is in", filename,'and adding headers...')
-                #print('>>>>> add header to',filename)
                 filtered_master = master[master['User_ID'] == career_account]
                 add_header_common(filename, filtered_master, config_file, overwrite=False)
     return(found_text_files)
