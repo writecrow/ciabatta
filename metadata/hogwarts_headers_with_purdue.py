@@ -36,8 +36,7 @@ parser.add_argument('--cms', action="store", dest='cms', default='d2l')
 parser.add_argument('--config_file', action="store", dest='config_file', default='metadata_folder/config.yaml')
 args = parser.parse_args()
 
-# creates a function to add the metadata headers to each individual text file
-# depending on metadata type
+# function to add the metadata headers to each individual text file
 def add_header_common(filename, master_row, config_file, overwrite=False):
     textfile = open(filename, 'r')
     config_file = open(config_file, 'r')
@@ -131,7 +130,8 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     output_filename += '.txt'
     output_filename = re.sub(r'\s', r'', output_filename)
     output_filename = re.sub(r'__', r'_NA_', output_filename)
-
+ 
+    # check if master_row has just one row
     if 'Series' not in output_filename:
         term = master_row[column_specs['term']].to_string(index=False)
         term = term.strip()
