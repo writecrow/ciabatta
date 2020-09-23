@@ -53,8 +53,9 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     column_specs = headers_list['column_specs']
     fixed_expressions = headers_list['fixed_expressions']
 
-
+    # normalizes path to work across platforms (PC, Mac)
     normed_path = os.path.normpath(filename)
+    # splits the parts of the path across platforms
     filename_parts = normed_path.split(os.sep)
 
     print("Processing file: ", filename_parts)
