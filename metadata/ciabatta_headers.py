@@ -151,7 +151,7 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
         cwd = os.getcwd()
         path = os.path.join(cwd, new_folder, term, "ENGL " + course, assignment, draft)
 
-        # checks if such a folder exists, if not, it creates it
+        # checks if such a folder exists, if not, it creates the folder
         if not os.path.exists(path):
             os.makedirs(path)
 
