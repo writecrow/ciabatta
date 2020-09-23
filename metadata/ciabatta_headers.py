@@ -51,7 +51,7 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     normed_path = os.path.normpath(filename)
     filename_parts = normed_path.split(os.sep)
 
-    print(filename_parts) # ACTION: make this clearer to the user, e.g. Processing file ...
+    print("Processing file: ", filename_parts)
 
     # retrieves course number from "course" column in the metadata spreasheet
     course = master_row[column_specs['course']].to_string(index=False)
@@ -159,7 +159,7 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
         whole_path = os.path.join(path, output_filename)
         # open output file
         output_file = open(whole_path, 'w')
-        print(path + output_filename) # ACTION: make this more informative for the user, e.g. Writing on file ...
+        print("Writing on file: ", path + output_filename)
 
         # retrieves country from "country" column in the metadata spreasheet
         country = master_row[column_specs['country']].to_string(index=False)
@@ -341,7 +341,7 @@ def add_header_to_file_blackboard(filename, master, config_file, overwrite=False
             # check if that career account is in filename (that's our student!)
             if re.search('_'+str(career_account)+'_', filename):
                 # let user know that there was a match
-                print('>>>>> matched: ', '_'+career_account+'_', "is in", filename,'and adding headers...')
+                print('Matched: ', '_'+career_account+'_', "is in", filename,'and adding headers...')
 
                 # retrieve row for that student from metadata
                 filtered_master = master[master['User_ID'] == career_account]
@@ -362,12 +362,12 @@ def add_header_to_file_d2l(filename, master, config_file, overwrite=False):
         found_text_files = True
         # splits the filename by a dash with a space "- "
         filename_parts = filename.split('- ')
-        print("filename parts: ", filename_parts)
+        
         # removes ".txt" extension from the filename
         student_name = re.sub(r'\.txt', r'', filename_parts[1])
         # removes any extra spaces from the filename
         student_name = re.sub(r'\s+', r' ', student_name)
-        print("Student name: ", student_name)
+      
         # checks to see if the last element of the student name is "-"
         if student_name[-1] == '-':
             # if it is, it removes it
