@@ -47,10 +47,11 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     column_specs = headers_list['column_specs']
     fixed_expressions = headers_list['fixed_expressions']
 
-    not_windows_filename = re.sub(r'\\', r'/', filename) # ACTION: change this to os.path
-    clean_filename = re.sub(r'\.\.\/', r'', not_windows_filename) # ACTION: change this to os.path
-    filename_parts2 = clean_filename.split('/') # ACTION: change this to os.path
-    print(filename_parts2) # ACTION: make this clearer to the user, e.g. Processing file ...
+ 
+    normed_path = os.path.normpath(filename)
+    filename_parts = normed_path.split(os.sep)
+   
+    print(filename_parts) # ACTION: make this clearer to the user, e.g. Processing file ...
 
     # retrieves course number from "course" column in the metadata spreasheet
     course = master_row[column_specs['course']].to_string(index=False)
@@ -60,8 +61,8 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     course = re.sub(r'NaN', r'NA', course)
 
     # gets assignment and draft from the filename path (included in the folder structure)
-    assignment = filename_parts2[3][:2]
-    draft = filename_parts2[3][2:]
+    assignment = filename_parts[3][:2]
+    draft = filename_parts[3][2:]
     # replaces "D" for draft to an empty space
     draft = re.sub('D', '', draft)
     
