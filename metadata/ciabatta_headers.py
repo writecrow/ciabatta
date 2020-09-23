@@ -36,6 +36,12 @@ parser.add_argument('--cms', action="store", dest='cms', default='d2l')
 parser.add_argument('--config_file', action="store", dest='config_file', default='metadata_folder/config.yaml')
 args = parser.parse_args()
 
+# function that removes leading spaces and replaces "NaN" with "NA"
+def clean_string(my_string):
+    my_string = my_string.strip()
+    my_string = re.sub(r'NaN', r'NA', my_string)
+    return(my_string)
+
 # function to add the metadata headers to each individual text file
 def add_header_common(filename, master_row, config_file, overwrite=False):
     # open individual text file
@@ -53,12 +59,8 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
 
     print("Processing file: ", filename_parts)
 
-    # retrieves course number from "course" column in the metadata spreasheet
-    course = master_row[column_specs['course']].to_string(index=False)
-    # strips white spaces around the course number values in the column
-    course = course.strip()
-    # replaces "NaN" to "NAN" for the course variable
-    course = re.sub(r'NaN', r'NA', course)
+    # retrieves and cleans course number from "course" column in the metadata spreasheet
+    course = clean_string(master_row[column_specs['course']].to_string(index=False))
 
     # gets assignment and draft from the filename path (included in the folder structure)
     assignment = filename_parts[3][:2]
@@ -73,12 +75,8 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     # replaces "NaN" to "NAN" for the country_code variable
     country_code = re.sub(r'NaN', r'NAN', country_code)
 
-    # retrieves year in school from "year_in_school" column in the metadata spreasheet
-    year_in_school = master_row[column_specs['year_in_school']].to_string(index=False)
-    # strips white spaces around the year_in_school values in the column
-    year_in_school = year_in_school.strip()
-    # creates a new variable for year in school and assigns it "NA"
-    year_in_school_numeric = 'NA'
+    # retrieves and cleans year in school from "year_in_school" column in the metadata spreasheet
+    year_in_school = clean_string(master_row[column_specs['year_in_school']].to_string(index=False))
 
     # if school year is not one of the four numbers (1,2,3 or 4)
     if year_in_school not in ['1','2','3','4']:
@@ -101,19 +99,15 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
     else:
         year_in_school_numeric = year_in_school
 
-    # retrieves gender from "gender" column in the metadata spreasheet
-    gender = master_row[column_specs['gender']].to_string(index=False)
-    # strips white spaces around gender column values in the spreasheet
-    gender = gender.strip()
-    # replaces NaN to NA for gender
-    gender = re.sub(r'NaN', r'NA', gender)
+    # retrieves and cleans gender from "gender" column in the metadata spreasheet
+    gender = clean_string(master_row[column_specs['gender']].to_string(index=False))
+    
 
     # retrieves crow id from "crow_id" column in the metadata spreasheet
-    crow_id = master_row[column_specs['crow_id']].to_string(index=False)
-    # strips white spaces around "crow_id" column values in the spreasheet
-    crow_id = crow_id.strip()
-    # replaces NaN to NA in for crow ids
-    crow_id = re.sub(r'NaN', r'NA', crow_id)
+    crow_id = clean_string(master_row[column_specs['crow_id']].to_string(index=False))
+    if crow_id == "NA":
+         print("This student does not have a Crow ID")
+   
 
     # retrieves institution values from "institution" column in the metadata spreasheet (for example University of Arizona)
     # and removes all lowercase characters from the string resulting in UA as an institution code
@@ -161,15 +155,11 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
         output_file = open(whole_path, 'w')
         print("Writing on file: ", path + output_filename)
 
-        # retrieves country from "country" column in the metadata spreasheet
-        country = master_row[column_specs['country']].to_string(index=False)
-        # removes white space around the country column value
-        country = country.strip()
+        # retrieves and cleans country from "country" column in the metadata spreasheet
+        country = clean_string(master_row[column_specs['country']].to_string(index=False))
 
-        # retrieves institution from "institution" column in the metadata spreasheet
-        institution = master_row['institution'].to_string(index=False)
-        # removes white space around the institution column value
-        institution = institution.strip()
+        # retrieves and cleans institution from "institution" column in the metadata spreasheet
+        institution = clean_string(master_row['institution'].to_string(index=False))
 
         # creates a semester variable from the first element of the term variable
         # assuming term is "Spring 2019" for example
@@ -178,68 +168,37 @@ def add_header_common(filename, master_row, config_file, overwrite=False):
         year = term.split()[1]
 
         # retrieves college from "college" column in the metadata spreasheet
-        college = master_row[column_specs['college']].to_string(index=False)
+        college = clean_string(master_row[column_specs['college']].to_string(index=False))
         # retrieves program from "program" column in the metadata spreasheet
-        program = master_row[column_specs['program']].to_string(index=False)
+        program = clean_string(master_row[column_specs['program']].to_string(index=False))
         # retrieves overall TOEFL scores from "TOEFL_COMPI" column in the metadata spreasheet
-        TOEFL_COMPI = master_row[column_specs['TOEFL_COMPI']].to_string(index=False)
+        TOEFL_COMPI = clean_string(master_row[column_specs['TOEFL_COMPI']].to_string(index=False))
         # retrieves TOEFL listening scores from "TOEFL_Listening" column in the metadata spreasheet
-        TOEFL_Listening = master_row[column_specs['TOEFL_Listening']].to_string(index=False)
+        TOEFL_Listening = clean_string(master_row[column_specs['TOEFL_Listening']].to_string(index=False))
         # retrieves TOEFL reading scores from "TOEFL_Reading" column in the metadata spreasheet
-        TOEFL_Reading = master_row[column_specs['TOEFL_Reading']].to_string(index=False)
+        TOEFL_Reading = clean_string(master_row[column_specs['TOEFL_Reading']].to_string(index=False))
         # retrieves TOEFL writing scores from "TOEFL_Writing" column in the metadata spreasheet
-        TOEFL_Writing = master_row[column_specs['TOEFL_Writing']].to_string(index=False)
+        TOEFL_Writing = clean_string(master_row[column_specs['TOEFL_Writing']].to_string(index=False))
         # retrieves TOEFL speaking scores from "TOEFL_Speaking" column in the metadata spreasheet
-        TOEFL_Speaking = master_row[column_specs['TOEFL_Speaking']].to_string(index=False)
+        TOEFL_Speaking = clean_string(master_row[column_specs['TOEFL_Speaking']].to_string(index=False))
         # retrieves overall IELTS scores from "IELTS_Overall" column in the metadata spreasheet
-        IELTS_Overall = master_row[column_specs['IELTS_Overall']].to_string(index=False)
+        IELTS_Overall = clean_string(master_row[column_specs['IELTS_Overall']].to_string(index=False))
         # retrieves IELTS listening scores from "IELTS_Listening" column in the metadata spreasheet
-        IELTS_Listening = master_row[column_specs['IELTS_Listening']].to_string(index=False)
+        IELTS_Listening = clean_string(master_row[column_specs['IELTS_Listening']].to_string(index=False))
         # retrieves IELTS reading scores from "IELTS_Reading" column in the metadata spreasheet
-        IELTS_Reading = master_row[column_specs['IELTS_Reading']].to_string(index=False)
+        IELTS_Reading = clean_string(master_row[column_specs['IELTS_Reading']].to_string(index=False))
         # retrieves IELTS writing scores from "IELTS_Writing" column in the metadata spreasheet
-        IELTS_Writing = master_row[column_specs['IELTS_Writing']].to_string(index=False)
+        IELTS_Writing = clean_string(master_row[column_specs['IELTS_Writing']].to_string(index=False))
         # retrieves IELTS speaking scores from "IELTS_Speaking" column in the metadata spreasheet
-        IELTS_Speaking = master_row[column_specs['IELTS_Speaking']].to_string(index=False)
+        IELTS_Speaking = clean_string(master_row[column_specs['IELTS_Speaking']].to_string(index=False))
         # retrieves instructor information from "instructor" column in the metadata spreasheet
-        instructor = master_row[column_specs['instructor']].to_string(index=False)
+        instructor = clean_string(master_row[column_specs['instructor']].to_string(index=False))
         #section = master_row[column_specs['country']].to_string(index=False)
 
         # retrieves mode (e.g. face to face) from "mode" column in the metadata spreasheet
-        mode = master_row[column_specs['mode']].to_string(index=False)
+        mode = clean_string(master_row[column_specs['mode']].to_string(index=False))
         # retrieves course length (e.g. 16 weeks) from "length" column in the metadata spreasheet
-        length = master_row[column_specs['length']].to_string(index=False)
-
-        # strips white spaces around the values from the following columns in the data
-        college = college.strip()
-        program = program.strip()
-        TOEFL_COMPI = TOEFL_COMPI.strip()
-        TOEFL_Listening = TOEFL_Listening.strip()
-        TOEFL_Reading = TOEFL_Reading.strip()
-        TOEFL_Writing = TOEFL_Writing.strip()
-        TOEFL_Speaking = TOEFL_Speaking.strip()
-        IELTS_Overall = IELTS_Overall.strip()
-        IELTS_Listening = IELTS_Listening.strip()
-        IELTS_Reading = IELTS_Reading.strip()
-        IELTS_Writing = IELTS_Writing.strip()
-        IELTS_Speaking = IELTS_Speaking.strip()
-        instructor = instructor.strip()
-        #section = section.strip()
-        mode = mode.strip()
-        length = length.strip()
-
-        # replaces "NaN" values to "NA"s
-        country = re.sub(r'NaN', r'NA', country)
-        TOEFL_COMPI = re.sub(r'NaN', r'NA', TOEFL_COMPI)
-        TOEFL_Listening = re.sub(r'NaN', r'NA', TOEFL_Listening)
-        TOEFL_Reading = re.sub(r'NaN', r'NA', TOEFL_Reading)
-        TOEFL_Writing = re.sub(r'NaN', r'NA', TOEFL_Writing)
-        TOEFL_Speaking = re.sub(r'NaN', r'NA', TOEFL_Speaking)
-        IELTS_Overall = re.sub(r'NaN', r'NA', IELTS_Overall)
-        IELTS_Listening = re.sub(r'NaN', r'NA', IELTS_Listening)
-        IELTS_Reading = re.sub(r'NaN', r'NA', IELTS_Reading)
-        IELTS_Writing = re.sub(r'NaN', r'NA', IELTS_Writing)
-        IELTS_Speaking = re.sub(r'NaN', r'NA', IELTS_Speaking)
+        length = clean_string(master_row[column_specs['length']].to_string(index=False))
 
         # creates new variables to combine proficiency exam scores
         proficiency_exam = ''
