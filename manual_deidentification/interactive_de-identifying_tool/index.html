@@ -93,7 +93,10 @@
                 		output = e.target.result;
                 		var text = '';
                     var start_text = false;
-                		var lines = output.split(/\r\n+/);
+                    if (output.indexOf('<End Header>') == -1) {
+                      start_text = true;
+                    }
+                		var lines = output.split(/\r?\n+/);
                     for (i = 0; i < lines.length; i++) {
                       var this_line1 = lines[i]
                       var tokens = this_line1.split(' ')
