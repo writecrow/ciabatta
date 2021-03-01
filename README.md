@@ -1,3 +1,4 @@
+$('#readme').insertBefore('.file-navigation');
 # CIABATTA
 Corpus In A Box: Automated Tools, Tutorials, &amp; Advising
 
