@@ -56,7 +56,7 @@ if args.file1 and args.file2 and args.yaml_file:
     yaml_file = open(args.yaml_file, "r")
     yaml_contents = yaml.load(yaml_file, Loader = yaml.FullLoader)
 
-    # check if file 1 needs to be flatten
+    # check if file 1 needs to be flattened
     new_column_name = yaml_contents["file_1"]["tab"]
     if new_column_name:
         file1_data = flatten_tabs(file1, new_column_name)
