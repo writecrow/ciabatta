@@ -20,7 +20,7 @@ import re
 import sys
 import yaml
 
-# define the way we retrieve arguments sent to the script.
+# define the way we retrieve arguments sent to the script
 parser = argparse.ArgumentParser(description='Merge Metadata')
 parser.add_argument('--file1', action="store", dest='file1', default='')
 parser.add_argument('--file2', action="store", dest='file2', default='')
@@ -63,14 +63,14 @@ if args.file1 and args.file2 and args.yaml_file:
     else:
         file1_data = pandas.read_excel(file1)
 
-    # check if file 2 needs to be flatten
+    # check if file 2 needs to be flattened
     new_column_name = yaml_contents["file_2"]["tab"]
     if new_column_name:
         file2_data = flatten_tabs(file2, new_column_name)
     else:
         file2_data = pandas.read_excel(file2)
         
-    # comnine the file on the column "Name"
+    # combine the file on the column "Name"
     combined_file = file1_data.join(file2_data.set_index('Name'), on='Name',
     lsuffix='_file1', rsuffix='_file2')
 
