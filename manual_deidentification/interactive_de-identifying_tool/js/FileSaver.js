@@ -75,7 +75,7 @@ var saveAs = saveAs || (function(view) {
 		}
 		, FileSaver = function(blob, name, no_auto_bom) {
 			if (!no_auto_bom) {
-				blob = auto_bom(blob);
+				//blob = auto_bom(blob);
 			}
 			// First try a.download, then web filesystem, then object URLs
 			var
@@ -149,7 +149,7 @@ var saveAs = saveAs || (function(view) {
 			name = name || blob.name || "download";
 
 			if (!no_auto_bom) {
-				blob = auto_bom(blob);
+				//blob = auto_bom(blob);
 			}
 			return navigator.msSaveOrOpenBlob(blob, name);
 		};
