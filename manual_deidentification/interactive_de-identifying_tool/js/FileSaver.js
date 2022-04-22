@@ -65,18 +65,7 @@ var saveAs = saveAs || (function(view) {
 				}
 			}
 		}
-		, auto_bom = function(blob) {
-			// prepend BOM for UTF-8 XML and text/* types (including HTML)
-			// note: your browser will automatically convert UTF-16 U+FEFF to EF BB BF
-			if (/^\s*(?:text\/\S*|application\/xml|\S*\/\S*\+xml)\s*;.*charset\s*=\s*utf-8/i.test(blob.type)) {
-				return new Blob([String.fromCharCode(0xFEFF), blob], {type: blob.type});
-			}
-			return blob;
-		}
-		, FileSaver = function(blob, name, no_auto_bom) {
-			if (!no_auto_bom) {
-				//blob = auto_bom(blob);
-			}
+		, FileSaver = function(blob, name) {
 			// First try a.download, then web filesystem, then object URLs
 			var
 				  filesaver = this
@@ -139,18 +128,14 @@ var saveAs = saveAs || (function(view) {
 			fs_error();
 		}
 		, FS_proto = FileSaver.prototype
-		, saveAs = function(blob, name, no_auto_bom) {
-			return new FileSaver(blob, name || blob.name || "download", no_auto_bom);
+		, saveAs = function(blob, name) {
+			return new FileSaver(blob, name || blob.name || "download");
 		}
 	;
 	// IE 10+ (native saveAs)
 	if (typeof navigator !== "undefined" && navigator.msSaveOrOpenBlob) {
-		return function(blob, name, no_auto_bom) {
+		return function(blob, name) {
 			name = name || blob.name || "download";
-
-			if (!no_auto_bom) {
-				//blob = auto_bom(blob);
-			}
 			return navigator.msSaveOrOpenBlob(blob, name);
 		};
 	}
